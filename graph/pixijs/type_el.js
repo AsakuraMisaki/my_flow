@@ -1,40 +1,7 @@
+import { tryAddBasicInput, tryCustomPropOutput, simpleArray, simpleNumber, tryCustomArrayOutput, simpleValue } from "./main";
 
 
 let ctx = { group:"pixijs" };
-
-function tryAddBasicInput(_this, ...props){
-  props.forEach((p)=>{
-    let type = p.type;
-    _this.addInput(p.key, type);
-    _this[`${p.key}_widget`] = _this.addWidget(type, p.key, "");
-  })
-  // _this.widgets_up = true;
-}
-function simpleNumber(value){
-  value = value || 0;
-  return Number(value);
-}
-function simpleArray(value){
-  value = value || [];
-  return value;
-}
-function simpleArray(value){
-  value = value || [];
-  return value;
-}
-function tryCustomPropOutput(_this, trans, indexs){
-  let obj = { };
-  indexs.forEach((i)=>{
-    let temp = _this.getInputData(i);
-    if(temp == undefined){
-      temp = _this.widgets[i].value;
-    }
-    let value = trans(temp);
-    let key = _this.getInputInfo(i).name;
-    obj[key] = value;
-  })
-  return obj;
-}
 //node constructor class
 function Window()
 {
@@ -59,7 +26,10 @@ Window.title = "Window";
 Window.prototype.onExecute = function()
 {
   let obj = tryCustomPropOutput(this, simpleNumber, [0, 1, 2, 3, 4]);
-  this.setOutputData( 0, obj );
+  let obj1 = tryCustomPropOutput(this, simpleArray, [5, 6]);
+  let result = { };
+  Object.assign(result, obj, obj1);
+  this.setOutputData( 0, result );
 }
 
 function Sprite()
@@ -75,6 +45,14 @@ function Sprite()
   this.addInput("children", "array");
   this.addInput("features", ["array", "feature"]);
   this.properties = { precision: 1 };
+}
+Sprite.prototype.onExecute = function()
+{
+  let obj = tryCustomPropOutput(this, simpleNumber, [0, 1, 2, 3, 4]);
+  let obj1 = tryCustomPropOutput(this, simpleArray, [5, 6]);
+  let result = { };
+  Object.assign(result, obj, obj1);
+  this.setOutputData( 0, result );
 }
 
 //name to show
@@ -92,6 +70,14 @@ function Graphics()
   this.addInput("features", ["array", "feature"]);
   this.properties = { precision: 1 };
 }
+Graphics.prototype.onExecute = function()
+{
+  let obj = tryCustomPropOutput(this, simpleNumber, [0, 1, 2]);
+  let obj1 = tryCustomPropOutput(this, simpleArray, [3, 4]);
+  let result = { };
+  Object.assign(result, obj, obj1);
+  this.setOutputData( 0, result );
+}
 
 //name to show
 Graphics.title = "Graphics";
@@ -108,6 +94,14 @@ function Text()
   this.addInput("features", ["array", "feature"]);
   this.properties = { precision: 1 };
 }
+Text.prototype.onExecute = function()
+{
+  let obj = tryCustomPropOutput(this, simpleNumber, [0, 1, 2]);
+  let obj1 = tryCustomPropOutput(this, simpleArray, [3, 4]);
+  let result = { };
+  Object.assign(result, obj, obj1);
+  this.setOutputData( 0, result );
+}
 
 //name to show
 Text.title = "Text";
@@ -116,8 +110,8 @@ function CTX()
 {
   this.addInput("ctx", "pixijs");
   tryAddBasicInput(this, 
-    {type:"number", key:"ip"}, 
-    {type:"number", key:"global_name"}, 
+    {type:"string", key:"ip"}, 
+    {type:"string", key:"global_name"}, 
   )
   this.properties = { precision: 1 };
 }

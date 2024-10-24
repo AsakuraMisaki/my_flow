@@ -1,3 +1,4 @@
+import { tryCustomArrayOutput, simpleValue, tryAddBasicInput, tryCustomPropOutput, simpleArray, simpleNumber } from "./main";
 
 
 let ctx = { group:"reflect" };
@@ -5,12 +6,16 @@ let ctx = { group:"reflect" };
 function R()
 {
   this.addOutput("R", ctx.group);
-  this.value_widget = this.addWidget("text", "", "");
+  this.value_widget = this.addWidget("text", "", "id");
   this.widgets_up = true;
   this.size = [105, 40];
   this.properties = { precision: 1 };
 }
 R.title = "R";
+R.prototype.onExecute = function(){
+  let id = this.value_widget.value;
+  this.setOutputData(0, { R:id });
+}
 
 let StaticArray = { };
 let range = 10;
@@ -25,6 +30,18 @@ for(let i=1; i<range; i++){
   let title = `StaticArray${i}`;
   temp.title = title;
   StaticArray[title] = temp;
+  temp.prototype.onExecute = function(){
+    StaticArray.onExecute.call(this, ...arguments);
+  }
+}
+
+StaticArray.onExecute = function(){
+  let indexs = [];
+  this.inputs.forEach((data, i) => {
+    indexs.push(i);
+  });
+  let array = tryCustomArrayOutput(this, simpleValue, indexs);
+  this.setOutputData( 0, array );
 }
 
 let StaticObject = { };
@@ -34,13 +51,29 @@ for(let i=1; i<range; i++){
     this.properties = { precision: 1 };
     for(let y=0; y<i; y++){
       this.addInput("", "");
-      this.value_widget = this.addWidget("text", "value", "");
+      this.value_widget = this.addWidget("text", "key", `id${y}`);
       this.widgets_up = true;
     }
   }
   let title = `StaticObject${i}`;
   temp.title = title;
   StaticObject[title] = temp;
+  temp.prototype.onExecute = function(){
+    StaticObject.onExecute.call(this, ...arguments);
+  }
+}
+
+StaticObject.onExecute = function(){
+  let obj = { };
+  this.inputs.forEach((data, i) => {
+    if(!data.link) return;
+    let value = this.getInputData(i);
+    let key = this.widgets[i].value;
+    obj[key] = value;
+  });
+  this.setOutputData( 0, obj );
+  // let obj = tryCustomPropOutput(this, simpleValue, indexs);
+  // this.setOutputData( 0, obj );
 }
 
 function Concat()
@@ -51,6 +84,14 @@ function Concat()
   this.properties = { precision: 1 };
 }
 Concat.title = "a + b";
+Concat.prototype.onExecute = function(){
+  if(typeof(obja) == typeof(objb) == "object"){
+    let obja = tryCustomPropOutput(this, simpleValue, [0]);
+    let objb = tryCustomPropOutput(this, simpleValue, [1]);
+  }
+  
+
+}
 
 function Assign()
 {

@@ -102,13 +102,15 @@ function simpleDiscard(...types) {
 
 function readyTest() {
   let ctx = LiteGraph.createNode("pixijs/ctx");
-  ctx.pos = [200, 200];
+  ctx.pos = [700, 200];
   graph.add(ctx);
 
 
   let window = LiteGraph.createNode("pixijs/window");
-  window.pos = [700, 200];
+  window.pos = [200, 200];
   graph.add(window);
+
+  // window.connect()
 
   simpleDiscard("audio", "input", "events", "geometry", "midi", "network", "math3d", "widget");
   EV.emit("ready");

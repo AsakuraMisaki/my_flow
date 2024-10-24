@@ -1,19 +1,23 @@
+import { tryAddBasicInput, tryCustomPropOutput, simpleArray, simpleNumber, simpleValue } from "./main";
+
 let ctx = { group:"feature" };
 let ex = { ctx };
 function Cut_Tile()
 {
   this.addOutput("self", ctx.group)
-  this.addInput("index", ["number", "reflect"]);
-  this.addInput("pw", ["number", "reflect"]);
-  this.addInput("ph", ["number", "reflect"]);
+  tryAddBasicInput(this,
+    {key:"index", type:["number", "reflect"]},
+    {key:"pw", type:["number", "reflect"]},
+    {key:"ph", type:["number", "reflect"]},
+  )
   this.properties = { precision: 1 };
 }
 Cut_Tile.title = "Cut_Tile";
 
 Cut_Tile.prototype.onExecute = function()
 {
-  
-  
+  let obj = tryCustomPropOutput(this, simpleNumber, [0, 1, 2]);
+  this.setOutputData( 0, obj );
 }
 
 
@@ -27,6 +31,11 @@ function Cut()
   this.properties = { precision: 1 };
 }
 Cut.title = "Cut";
+Cut.prototype.onExecute = function()
+{
+  let obj = tryCustomPropOutput(this, simpleNumber, [0, 1, 2, 3]);
+  this.setOutputData( 0, obj );
+}
 
 function Cut_Object()
 {
@@ -69,14 +78,35 @@ function Dynamic()
   this.properties = { precision: 1 };
 }
 Dynamic.title = "Dynamic";
+Dynamic.prototype.onExecute = function(){
+  let layout = simpleValue(this.getInputData(0));
+  let source = simpleArray(this.getInputData(1));
+  let instances_t = simpleArray(this.getInputData(2));
+  let instances = { };
+  instances_t.forEach((data, i)=>{
+    if(!data.key) return;
+    instances[data.key] = data.obj;
+  })
+  this.setOutputData(0, { type:this.type, layout, source, instances })
+}
 
-function Self()
+function HasKey()
 {
-  this.addOutput("self", ctx.group)
-  this.addInput("r", "reflect");
+  this.addOutput("instance", "reflect")
+  this.addInput("", "pixijs");
+  this.value_widget = this.addWidget("text", "", "key");
+  this.widgets_up = true;
+  this.size = [100, 40];
   this.properties = { precision: 1 };
 }
-Self.title = "Self";
+HasKey.title = "HasKey";
+HasKey.prototype.onExecute = function(){
+  let obj = simpleValue(this.getInputData(0));
+  let key = this.widgets[0].value;
+  if(obj && key){
+    this.setOutputData(0, { key, obj });
+  }
+}
 
 function Size_Flag()
 {
@@ -128,7 +158,7 @@ function Note()
 Note.title = "Note";
 
 Object.assign(ex, 
-  { Self, Cut_Tile, Cut, Cut_Object, Drag, Scroll, Size_Flag, Anchor, Mask, Style, Dynamic_Grid, Dynamic }
+  { HasKey, Cut_Tile, Cut, Cut_Object, Drag, Scroll, Size_Flag, Anchor, Mask, Style, Dynamic_Grid, Dynamic }
 );
 
 export default ex;
