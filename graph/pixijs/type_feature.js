@@ -12,7 +12,7 @@ Cut_Tile.title = "Cut_Tile";
 
 Cut_Tile.prototype.onExecute = function()
 {
-  console.log(this);
+  
   
 }
 

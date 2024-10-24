@@ -10,6 +10,31 @@ function tryAddBasicInput(_this, ...props){
   })
   // _this.widgets_up = true;
 }
+function simpleNumber(value){
+  value = value || 0;
+  return Number(value);
+}
+function simpleArray(value){
+  value = value || [];
+  return value;
+}
+function simpleArray(value){
+  value = value || [];
+  return value;
+}
+function tryCustomPropOutput(_this, trans, indexs){
+  let obj = { };
+  indexs.forEach((i)=>{
+    let temp = _this.getInputData(i);
+    if(temp == undefined){
+      temp = _this.widgets[i].value;
+    }
+    let value = trans(temp);
+    let key = _this.getInputInfo(i).name;
+    obj[key] = value;
+  })
+  return obj;
+}
 //node constructor class
 function Window()
 {
@@ -33,13 +58,8 @@ Window.title = "Window";
 //function to call when the node is executed
 Window.prototype.onExecute = function()
 {
-  // var A = this.getInputData(0);
-  // if( A === undefined )
-  //   A = 0;
-  // var B = this.getInputData(1);
-  // if( B === undefined )
-  //   B = 0;
-  // this.setOutputData( 0, A + B );
+  let obj = tryCustomPropOutput(this, simpleNumber, [0, 1, 2, 3, 4]);
+  this.setOutputData( 0, obj );
 }
 
 function Sprite()
@@ -102,7 +122,11 @@ function CTX()
   this.properties = { precision: 1 };
 }
 CTX.title = "CTX";
-
+CTX.prototype.onExecute = function()
+{
+  let ctx = this.getInputData(0);
+  console.log(ctx);
+}
 
 
 export { ctx, Window, CTX, Sprite, Text, Graphics }
