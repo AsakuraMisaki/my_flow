@@ -45,7 +45,6 @@ function tryAddBasicInput(_this, ...props){
   // _this.widgets_up = true;
 }
 function simpleNumber(value){
-  
   value = value || 0;
   return Number(value);
 }

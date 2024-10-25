@@ -81,6 +81,27 @@ StaticObject.onExecute = function(){
   // this.setOutputData( 0, obj );
 }
 
+function Try_Copy()
+{
+  this.properties = { precision: 1 };
+  this.addOutput("out", "array");
+  tryAddBasicInput(this, 
+    {key:"range", type:"number"},
+  )
+  this.addInput("value", "");
+}
+Try_Copy.title = "Try_Copy";
+Try_Copy.prototype.onExecute = function(){
+  let range=0;
+  let obj = tryCustomPropOutput(this, simpleNumber, [0]);
+  if(obj && typeof(obj.range) == "number"){
+    range = obj.range;
+  }
+  let v = this.getInputData(1);
+  let array = new Array(range).fill(v);
+  this.setOutputData(0, array);
+}
+
 function Concat()
 {
   this.addOutput("out", ["array", "object"]);
@@ -94,8 +115,6 @@ Concat.prototype.onExecute = function(){
     let obja = tryCustomPropOutput(this, simpleValue, [0]);
     let objb = tryCustomPropOutput(this, simpleValue, [1]);
   }
-  
-
 }
 
 function Assign()
@@ -108,7 +127,7 @@ function Assign()
 Assign.title = "a : {b}";
 
 
-let ex = { ctx, R, Concat, Assign };
+let ex = { ctx, R, Concat, Assign, Try_Copy };
 
 Object.assign(ex, StaticObject, StaticArray);
 
