@@ -14,7 +14,7 @@ function R()
 R.title = "R";
 R.prototype.onExecute = function(){
   let id = this.value_widget.value;
-  this.setOutputData(0, { R:id });
+  this.setOutputData(0, { R:id, type:this.type });
 }
 
 let StaticArray = { };
@@ -51,10 +51,15 @@ for(let i=1; i<range; i++){
     this.properties = { precision: 1 };
     for(let y=0; y<i; y++){
       this.addInput("", "");
-      this.value_widget = this.addWidget("text", "key", `id${y}`);
+      let p = `id${y}`;
+      this.addProperty(p, p);
+      this.value_widget = this.addWidget("text", p, "", p);
       this.widgets_up = true;
     }
   }
+  // temp.prototype.setValue = function(){
+
+  // }
   let title = `StaticObject${i}`;
   temp.title = title;
   StaticObject[title] = temp;

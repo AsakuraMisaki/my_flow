@@ -1,10 +1,11 @@
-import { tryAddBasicInput, tryCustomPropOutput, simpleArray, simpleNumber, tryCustomArrayOutput, simpleValue } from "./main";
+import { socket, tryAddBasicInput, tryCustomPropOutput, simpleArray, simpleNumber, tryCustomArrayOutput, simpleValue } from "./main";
 
 
 let ctx = { group:"pixijs" };
 //node constructor class
 function Window()
 {
+  this.properties = { precision: 1 };
   this.addOutput("self", ctx.group);
   tryAddBasicInput(this, 
     {type:"number", key:"x"}, 
@@ -16,7 +17,7 @@ function Window()
   this.addInput("children", "array");
   this.addInput("features", ["array", "feature"]);
   
-  this.properties = { precision: 1 };
+  
 }
 
 //name to show
@@ -34,6 +35,7 @@ Window.prototype.onExecute = function()
 
 function Sprite()
 {
+  this.properties = { precision: 1 };
   this.addOutput("self", ctx.group);
   tryAddBasicInput(this, 
     {type:"number", key:"x"}, 
@@ -44,7 +46,7 @@ function Sprite()
   )
   this.addInput("children", "array");
   this.addInput("features", ["array", "feature"]);
-  this.properties = { precision: 1 };
+  
 }
 Sprite.prototype.onExecute = function()
 {
@@ -60,6 +62,7 @@ Sprite.title = "Sprite";
 
 function Graphics()
 {
+  this.properties = { precision: 1 };
   this.addOutput("self", ctx.group);
   tryAddBasicInput(this, 
     {type:"number", key:"x"}, 
@@ -68,7 +71,7 @@ function Graphics()
   )
   this.addInput("children", "array");
   this.addInput("features", ["array", "feature"]);
-  this.properties = { precision: 1 };
+  
 }
 Graphics.prototype.onExecute = function()
 {
@@ -84,6 +87,7 @@ Graphics.title = "Graphics";
 
 function Text()
 {
+  this.properties = { precision: 1 };
   this.addOutput("self", ctx.group);
   tryAddBasicInput(this, 
     {type:"number", key:"x"}, 
@@ -92,7 +96,7 @@ function Text()
   )
   this.addInput("children", "array");
   this.addInput("features", ["array", "feature"]);
-  this.properties = { precision: 1 };
+  
 }
 Text.prototype.onExecute = function()
 {
@@ -108,19 +112,22 @@ Text.title = "Text";
 
 function CTX()
 {
+  this.properties = { precision: 1 };
   this.addInput("ctx", "pixijs");
   tryAddBasicInput(this, 
     {type:"string", key:"ip"}, 
     {type:"string", key:"global_name"}, 
   )
-  this.properties = { precision: 1 };
+  
 }
 CTX.title = "CTX";
 CTX.prototype.onExecute = function()
 {
   let ctx = this.getInputData(0);
-  console.log(ctx);
+  let target = {ctx:true, obj:ctx};
+  target = JSON.stringify(target);
+  console.log(target);
+  socket.send(target);
 }
-
 
 export { ctx, Window, CTX, Sprite, Text, Graphics }

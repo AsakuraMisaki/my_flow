@@ -92,12 +92,14 @@ Dynamic.prototype.onExecute = function(){
 
 function HasKey()
 {
+  this.properties = { precision: 1 };
   this.addOutput("instance", "reflect")
   this.addInput("", "pixijs");
-  this.value_widget = this.addWidget("text", "", "key");
+  this.addProperty("key", "key");
+  this.value_widget = this.addWidget("text", "", "", "key");
   this.widgets_up = true;
   this.size = [100, 40];
-  this.properties = { precision: 1 };
+  
 }
 HasKey.title = "HasKey";
 HasKey.prototype.onExecute = function(){
@@ -117,6 +119,14 @@ function Size_Flag()
   this.properties = { precision: 1 };
 }
 Size_Flag.title = "Size_Flag";
+Size_Flag.prototype.onExecute = function(){
+  let obj = tryCustomPropOutput(this, simpleNumber, [0, 1]);
+  let obj1 = tryCustomPropOutput(this, simpleArray, [2]);
+  if(obj && obj1){
+    let result = Object.assign(obj, obj1);
+    this.setOutputData(0, result);
+  }
+}
 
 
 function Style()
@@ -130,6 +140,14 @@ function Style()
   this.properties = { precision: 1 };
 }
 Style.title = "Style";
+Style.prototype.onExecute = function(){
+  let obj = tryCustomPropOutput(this, simpleNumber, [0, 3]);
+  let obj1 = tryCustomPropOutput(this, simpleValue, [1, 2, 4]);
+  if(obj && obj1){
+    let result = Object.assign(obj, obj1);
+    this.setOutputData(0, result);
+  }
+}
 
 function Mask()
 {

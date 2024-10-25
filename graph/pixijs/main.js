@@ -5,6 +5,14 @@ import * as R from "./type_reflect.js"
 import * as B from "./type_el.js"
 import * as F from "./type_feature.js"
 
+const socket = new WebSocket('ws://localhost:5173/');
+socket.addEventListener('open', (event) => {
+  console.warn('WebSocket 已连接');
+  // 发送消息到服务器
+  socket.send(JSON.stringify({ ctx:1, obj:{ a:'Hello, 服务器' } }));
+});
+
+
 console.warn(F);
 function register(m){
   m = m.default || m;
@@ -25,7 +33,14 @@ function tryAddBasicInput(_this, ...props){
     if(Array.isArray(type)){
       wtype = type[0];
     }
-    _this[`${p.key}_widget`] = _this.addWidget(wtype, p.key, "");
+    if(/number/i.test(wtype)){
+      _this.addProperty(p.key, 0.0);
+    }
+    else{
+      _this.addProperty(p.key, p.key);
+    }
+    
+    _this[`${p.key}_widget`] = _this.addWidget(wtype, p.key, "", p.key);
   })
   // _this.widgets_up = true;
 }
@@ -55,7 +70,7 @@ function tryCustomPropOutput(_this, trans, indexs){
       temp = _this.widgets[i].value;
     }
     let value = temp;
-    if(value && value.R);
+    if(value && value.R && /reflect\/r/i.test(value.type));
     else{
       value = trans(temp);
     }
@@ -85,5 +100,6 @@ export {
   tryCustomPropOutput, 
   tryAddBasicInput, 
   simpleNumber, 
-  simpleArray 
+  simpleArray,
+  socket
 }
