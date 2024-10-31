@@ -81,6 +81,7 @@
         if(target){
             let last = basicCtx.__cache;
             setTimeout(()=>{
+                if(!last) return;
                 SceneManager._scene.removeChild(last);
             }, 2000);
             basicCtx.__cache = target;

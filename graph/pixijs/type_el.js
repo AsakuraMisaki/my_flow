@@ -112,6 +112,29 @@ Text.prototype.onExecute = function()
 //name to show
 Text.title = "Text";
 
+function Container(){
+  this.properties = { precision: 1 };
+  this.addOutput("self", ctx.group);
+  tryAddBasicInput(this, 
+    { type:"number", key:"x" }, 
+    { type:"number", key:"y" }, 
+    { type:"number", key:"alpha"},
+  )
+  this.addInput("children", "array");
+  this.addInput("features", ["array", "feature"]);
+}
+Container.title = "Container";
+Container.prototype.onExecute = function()
+{
+  let ctx = this.getInputData(0);
+  let obj = tryCustomPropOutput(this, simpleNumber, [0, 1, 2]);
+  let obj1 = tryCustomPropOutput(this, simpleArray, [3, 4]);
+  let result = { };
+  Object.assign(result, obj, obj1);
+  this.setOutputData( 0, result );
+}
+
+
 function CTX()
 {
   this.properties = { precision: 1 };
@@ -120,7 +143,6 @@ function CTX()
     {type:"string", key:"ip"}, 
     {type:"string", key:"global_name"}, 
   )
-  
 }
 CTX.title = "CTX";
 CTX.prototype.onExecute = function()
