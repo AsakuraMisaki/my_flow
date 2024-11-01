@@ -1,16 +1,19 @@
-import ev from "./ev";
 
-class Component extends ev{
-  constructor(parent){
-    this._parent = parent;
+
+/**
+ * @description main concept is that the components is scoped
+ */
+class Component{
+  constructor(){
+    this.parent = null;
     this._destroy = false;
+    this._components = new Map();
+    this._delta = 0;
+    this._timeScale = 1;
   }
 
-  get parent(){
-    return this._parent;
-  }
-  set parent(actor){
-    this._parent = actor;
+  get delta(){
+    return this._delta * this._timeScale;
   }
 
   destroy(){
@@ -22,12 +25,17 @@ class Component extends ev{
   }
 
   onDestroy(){
-
+    
   }
 
-  update(delta){
-    this.emit("update", delta);
+  getComponent(absPath){
+    return this._components.get(absPath);
   }
+
+  onUpdate(delta){
+    this._delta = delta;
+  }
+
 }
 
 export default Component;

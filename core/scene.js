@@ -1,5 +1,11 @@
-import Actor from "./actor";
+import World from "./world";
 
-class Scene extends Actor{
-  
-}
+class Scene extends World{
+  constructor(){
+    super();
+  }
+
+  tree(){
+    
+  }
+} 
