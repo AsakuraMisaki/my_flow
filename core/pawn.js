@@ -1,6 +1,7 @@
-import Actor from "./actor";
+import { Entity } from "./Entity";
 
-class Pawn extends Actor{
+
+class Pawn extends Entity{
   constructor() {
     super();
   }
