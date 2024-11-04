@@ -53,6 +53,7 @@ class Drag extends Component{
     this.target = this.global = null;
     app.stage.off("pointerup", this._pu);
     app.stage.off("pointerupoutside", this._pu);
+    app.stage.off("pointermove", this._pm); //和子元素pointer事件冲突
   }
 
 }

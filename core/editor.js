@@ -24,7 +24,7 @@ await app.init({ background: '#1099bb', resizeTo: window });
 
 // Append the application canvas to the document body
 document.body.appendChild(app.canvas);
-app.stage.eventMode = 'static';
+// app.stage.eventMode = 'static';
 app.stage.hitArea = app.screen;
 const renderer = app.renderer;
 const stage = app.stage;
@@ -48,4 +48,4 @@ let editor1 = new Editor();
 editor1.onReady();
 editor1.x = 300;
 stage.addChild(editor1);
-editor.addComponent("drop", Drop);
+editor1.addComponent("drop", Drop);
