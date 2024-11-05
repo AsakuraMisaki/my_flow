@@ -8,6 +8,7 @@ class Input {
     let config = await Assets.load("../core/input.yaml");
     const pf = { passive: false };
     this.clearAllMotion(config);
+    
     // document.addEventListener("keydown", this._onKeyDown.bind(this));
     // document.addEventListener("keyup", this._onKeyUp.bind(this));
     // document.addEventListener("pointerdown", this._onPointerDown.bind(this));
