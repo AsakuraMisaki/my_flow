@@ -33,7 +33,6 @@ class Input {
     this._currentState = new Map();
     this._gcing = new Map();
     this._pointer = { _x: 0, _y: 0, x: 0, y: 0, wx: 0, wy: 0, _wx: 0, _wy: 0, ids: new Map() };
-    this.now = performance.now();
   }
 
   static _onKeyDown(e) {
