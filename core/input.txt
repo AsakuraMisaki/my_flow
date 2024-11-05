@@ -1,7 +1,0 @@
-default:
-  m0: [ok]
-  m1: []
-  m2: [esc, cancel]
-  q: [menu]
-  space: [jump]
-  [ctrl, c]: [test]
