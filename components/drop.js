@@ -25,20 +25,20 @@ class Drop extends Component{
   }
 
   pointermove(e) {
-    console.log(this.global);
+    // console.log(this.global);
     this._lastGlobal = this.global;
     this.E.emit("dragover", this.global);
   }
 
   pointerout(e){
-    console.warn(this.global);
+    // console.warn(this.global);
     this._lastGlobal = null;
     this.E.emit("dragleave", this.global);
   }
 
   pointerup(e){
     if(!this._lastGlobal) return;
-    console.error(this._lastGlobal);
+    // console.error(this._lastGlobal);
     this.E.emit("drop", this._lastGlobal);
     this._lastGlobal = null;
   }

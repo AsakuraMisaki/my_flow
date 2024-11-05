@@ -1,19 +1,48 @@
-import { Application, Assets, Texture } from "pixi.js";
-import { BaseSprite } from "../components/displayObject";
-import { Entity } from "./Entity";
+import { Application, Assets, Texture, Container } from "pixi.js";
+import { ContainerEntity, Entity, SpriteEntity } from "./Entity";
 import { Drag } from "../components/ItemDrag";
 import { Drop } from "../components/drop";
+import { Layer } from "./layer";
+import { Input } from "./input";
 
-class Editor extends Entity{
+class Editor extends ContainerEntity{
   constructor(){
     super();
+    this._layerMaps = new Map();
+    Input.setup();
+  }
+
+  addLayer(id, options){
+    const L = new Layer();
+    Object.assign(L, options);
+    L.label = id;
+    this._layerMaps.set(id, L);
+    this.addChild(L);
+    this.children.sort((a, b)=>{
+      return (a.zIndex || 1) - (b.zIndex || 1);
+    })
+    return L;
+  }
+
+  getLayer(id){
+    const L = this._layerMaps.get(id);
+    return L;
+  }
+
+  removeLayer(id){
+    const L = this._layerMaps.get(id);
+    L.remove();
   }
 
   async onReady(){
+    let ui = this.addLayer("ui", { zIndex:8 });
     const texture = await Assets.load("../res/icons.svg");
-    this.test = new BaseSprite(texture);
-    this.addChild(this.test);
-    // this.test.scale.x = this.test.scale.y = 10;
+    this.test = new SpriteEntity(texture);
+    this.test.addComponent("drag", Drag);
+    this.test1 = new SpriteEntity(texture);
+    this.test1.addComponent("drop", Drop);
+    this.test1.x = 300;
+    ui.addChild(this.test, this.test1);
   }
 }
 
@@ -25,7 +54,7 @@ await app.init({ background: '#1099bb', resizeTo: window });
 // Append the application canvas to the document body
 document.body.appendChild(app.canvas);
 // app.stage.eventMode = 'static';
-app.stage.hitArea = app.screen;
+// app.stage.interactive = true;
 const renderer = app.renderer;
 const stage = app.stage;
 const update = function(ticker){
@@ -37,15 +66,9 @@ app.ticker.add(update);
 
 window.app = app;
 
-export { Editor, app, renderer, stage };
-
 let editor = new Editor();
-editor.onReady();
 stage.addChild(editor);
-editor.addComponent("drag", Drag);
 
-let editor1 = new Editor();
-editor1.onReady();
-editor1.x = 300;
-stage.addChild(editor1);
-editor1.addComponent("drop", Drop);
+export { Editor, app, renderer, stage, editor };
+
+editor.onReady();

@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "js-yaml": "^4.1.0",
     "litegraph.js": "^0.7.18",
     "pixi.js": "^8.5.2",
     "vite": "^5.4.10",

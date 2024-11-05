@@ -1,0 +1,7 @@
+win64:
+  ok: [m0, e]
+  esc: [m2, escape]
+  cancel: [m2, escape]
+  menu: q
+  jump: [space, x]
+  test: [ctrl c, ctrl b]

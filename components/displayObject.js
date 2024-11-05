@@ -5,11 +5,6 @@ class BaseContainer extends Container{
     super(...arguments);
   }
 
-  update(delta){
-    this.children.forEach((c)=>{
-      c.update ? c.update(delta) : null;
-    })
-  }
 }
 
 class BaseSprite extends Sprite{
@@ -17,11 +12,6 @@ class BaseSprite extends Sprite{
     super(...arguments);
   }
 
-  update(delta){
-    this.children.forEach((c)=>{
-      c.update ? c.update(delta) : null;
-    })
-  }
 
 }
 
@@ -30,11 +20,6 @@ class BaseText extends Text{
     super(...arguments);
   }
 
-  update(delta){
-    this.children.forEach((c)=>{
-      c.update ? c.update(delta) : null;
-    })
-  }
 
 }
 
