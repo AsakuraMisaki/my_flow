@@ -1,16 +1,19 @@
 import { Application, Assets, Texture, Container } from "pixi.js";
 import { ContainerEntity, Entity, SpriteEntity } from "./Entity";
-import { Drag } from "../components/ItemDrag";
+import { Drag } from "../components/drag";
 import { Drop } from "../components/drop";
 import { Layer } from "./layer";
 import { Input } from "./input";
 import { YAML } from "./yaml";
+import { Hover } from "../components/hover";
 
 
 class Editor extends ContainerEntity{
   constructor(){
     super();
     this._layerMaps = new Map();
+    // this.renderable = false;
+
   }
 
   addLayer(id, options){
@@ -47,8 +50,11 @@ class Editor extends ContainerEntity{
     this.test = new SpriteEntity(texture);
     this.test.addComponent("drag", Drag);
     this.test1 = new SpriteEntity(texture);
-    // this.test1.addComponent("drop", Drop);
+
+    this.test1.addComponent("hover", Hover);
+    
     this.test1.x = 300;
+    this.test1.alpha = 0.5;
     ui.addChild(this.test, this.test1);
   }
 }
@@ -60,10 +66,14 @@ await app.init({ background: '#1099bb', resizeTo: window });
 
 // Append the application canvas to the document body
 document.body.appendChild(app.canvas);
-// app.stage.eventMode = 'static';
-// app.stage.interactive = true;
+app.stage.eventMode = 'static';
+app.stage.interactive = true;
 const renderer = app.renderer;
 const stage = app.stage;
+stage.hitArea = app.screen;
+stage.on("pointerdown", (e)=>{
+  console.warn(e);
+})
 const update = function(ticker){
   stage.children.forEach((c)=>{
     c.update ? c.update(ticker.deltaMS) : null;

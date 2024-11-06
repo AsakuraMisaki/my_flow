@@ -130,9 +130,10 @@ const Entity = {
   },
 
   _updateChildren(delta) {
-    let length = this.children.length;
+    let children = Array.from(this.children);
+    let length = children.length;
     for (let i = 0; i < length; i++) {
-      let c = this.children[i];
+      let c = children[i];
       if (c._destroy) {
         let index = i;
         i--;
@@ -184,6 +185,7 @@ class Component{
   constructor(){
     this._E = null;
     this._destroy = false;
+    this._pause = false;
   }
 
   get E(){
@@ -211,6 +213,7 @@ class Component{
   }
 
   update(delta){
+    if(this._pause) return;
     this.onUpdate(delta);
   }
 

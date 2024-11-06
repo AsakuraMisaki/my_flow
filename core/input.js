@@ -45,6 +45,7 @@ class Input {
   }
 
   static clear() {
+    this._hitTestCaches = new Map();
     this._currentState = new Map();
     this._gcing = new Map();
     this._pointer = new Pointer();
@@ -86,7 +87,13 @@ class Input {
     return key;
   }
 
+  static updatePointer(e) {
+    this._pointer._x = e.clientX - app.screen.x;
+    this._pointer._y = e.clientY - app.screen.y;
+  }
+
   static _onPointerDown(e) {
+    this.updatePointer(e);
     let key = this.pointerKey(e);
     this._onKeyDown({ key, keyCode: 0 });
     InputEmitter.emit("pointerdown", this.pointer);
@@ -94,10 +101,12 @@ class Input {
   }
 
   static _onPointerMove(e) {
+    this.updatePointer(e);
     InputEmitter.emit("pointermove", this.pointer);
   }
 
   static _onPointerUp(e) {
+    this.updatePointer(e);
     let key = this.pointerKey(e);
     this._onKeyUp({ key, keyCode: 0 });
     InputEmitter.emit("pointerup", this.pointer);
@@ -136,6 +145,7 @@ class Input {
 
   static update(delta) {
     if(!this._currentState) return;
+    this._hitTestCaches.clear();
     // 更新未释放的
     this._currentState.forEach((pressing, key) => {
       if (pressing.press < 0) {
@@ -254,8 +264,13 @@ class Input {
 
   // 性能节省, 不使用pixi的hitTest
   static hitTest(e) { 
+    if(this._hitTestCaches.has(e)){ //一帧之内查询多次的处理
+      return this._hitTestCaches.get(e);
+    }
     let rect = e.getBounds();
-    return this.hitTestRect(rect.x, rect.y, rect.width, rect.height);
+    let result = this.hitTestRect(rect.x, rect.y, rect.width, rect.height);
+    this._hitTestCaches.set(e, result);
+    return result;
   }
 
   static hitTestRect(x0, y0, w, h) {

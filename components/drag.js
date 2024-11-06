@@ -11,6 +11,7 @@ class Drag extends Component{
     super();
     this.target = null;
     this.preventDefault = false;
+    this._snapTarget = null;
   }
 
   get global(){
@@ -20,7 +21,11 @@ class Drag extends Component{
     Drag._global = v;
   }
 
-  update(){
+  setSnapTarget(e){
+    this._snapTarget = e;
+  }
+
+  onUpdate(){
     let start = this.updateDragStart();
     if(!start) return;
     let end = this.updateDragEnd();
@@ -38,7 +43,7 @@ class Drag extends Component{
     this.preventDefault ? null : this.defaultDragStart();
   }
   async defaultDragStart(){
-    let s = await snap(this.target);
+    let s = await snap(this._snapTarget || this.target);
     this.snap = s;
     s.alpha = 0.5;
     let layer = editor.getLayer("ui");

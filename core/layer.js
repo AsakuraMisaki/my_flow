@@ -1,7 +1,7 @@
 import { Application, Assets, Texture } from "pixi.js";
 import { BaseSprite } from "../components/displayObject";
 import { ContainerEntity, Entity } from "./Entity";
-import { Drag } from "../components/ItemDrag";
+import { Drag } from "../components/drag";
 import { Drop } from "../components/drop";
 
 class Layer extends ContainerEntity{

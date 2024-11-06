@@ -1,46 +1,44 @@
 import { Component } from "../core/Entity";
-import { Drag } from "./ItemDrag";
+import { Input, STATIC } from "../core/input";
+import { Drag } from "./drag";
 
 
 class Drop extends Component{
   constructor(){
     super();
     this._lastGlobal = null;
-    this._pm = this.pointermove.bind(this);
-    this._pu = this.pointerup.bind(this);
-    this._po = this.pointerout.bind(this);
+    this._lastHit = false;
   }
 
   get global(){
     return Drag._global;
   }
 
-
-  onAdd(){
-    super.onAdd();
-    this.E.on("pointerup", this._pu);
-    this.E.on("pointermove", this._pm);
-    this.E.on("pointerout", this._po);
-    this.E.interactive = true;
-  }
-
-  pointermove(e) {
-    // console.log(this.global);
+  updateDragOver(){
     this._lastGlobal = this.global;
-    this.E.emit("dragover", this.global);
-  }
-
-  pointerout(e){
-    // console.warn(this.global);
-    this._lastGlobal = null;
-    this.E.emit("dragleave", this.global);
-  }
-
-  pointerup(e){
     if(!this._lastGlobal) return;
-    // console.error(this._lastGlobal);
+    let hit = Input.hitTest(this.E);
+    if(!this._lastHit && hit){
+      this.E.emit("dragover", this._lastGlobal);
+    }
+    else if(!hit && this._lastHit){
+      this.E.emit("dragleave", this._lastGlobal);
+    }
+    this._lastHit = hit;
+    return this._lastHit;
+  }
+
+  updateDrop(hit){
+    if(!hit || !this._lastGlobal) return;
+    let pointerup = !Input.isPressed(STATIC.MOUSE0, 0);
+    if(!pointerup) return;
     this.E.emit("drop", this._lastGlobal);
     this._lastGlobal = null;
+  }
+
+  onUpdate(){
+    this.updateDrop(this._lastHit);
+    this.updateDragOver();
   }
 
 }
