@@ -204,6 +204,14 @@ class Component{
     
   }
 
+  pause(){
+    this._pause = true;
+  }
+
+  resume(){
+    this._pause = false;
+  }
+
   async onDestroy(){
     this._onDestroy = true;
   }
