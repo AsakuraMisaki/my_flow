@@ -4,12 +4,13 @@ import { Drag } from "../components/ItemDrag";
 import { Drop } from "../components/drop";
 import { Layer } from "./layer";
 import { Input } from "./input";
+import { YAML } from "./yaml";
+
 
 class Editor extends ContainerEntity{
   constructor(){
     super();
     this._layerMaps = new Map();
-    Input.setup();
   }
 
   addLayer(id, options){
@@ -34,13 +35,19 @@ class Editor extends ContainerEntity{
     L.remove();
   }
 
+  onUpdate(delta){
+    super.onUpdate(delta);
+    Input.update(delta);
+  }
+
   async onReady(){
+    await Input.setup();
     let ui = this.addLayer("ui", { zIndex:8 });
     const texture = await Assets.load("../res/icons.svg");
     this.test = new SpriteEntity(texture);
     this.test.addComponent("drag", Drag);
     this.test1 = new SpriteEntity(texture);
-    this.test1.addComponent("drop", Drop);
+    // this.test1.addComponent("drop", Drop);
     this.test1.x = 300;
     ui.addChild(this.test, this.test1);
   }

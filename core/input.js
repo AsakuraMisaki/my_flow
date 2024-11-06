@@ -1,13 +1,36 @@
 
 import { Assets, Loader, Rectangle, Resolver, extensions } from "pixi.js";
-import { YAML } from "./yaml";
+import { EV } from "./ev";
+import { app } from "./editor";
 
+const STATIC = { MOUSE0: { key:"m0" }, MOUSE1: {key: "m1"}, MOUSE2: { key: "m2"}  };
+for(let key in STATIC){
+  STATIC[key].parent = STATIC;
+}
+
+const InputEmitter = new EV();
+class Pointer{
+  constructor(){
+    this._x = 0;
+    this._y = 0;
+    this._wx = 0;
+    this._wy = 0;
+    this.wx = 0;
+    this.wy = 0;
+    this.ids = new Map();
+  }
+  get x(){
+    return this._x;
+  }
+  get y(){
+    return this._y;
+  }
+}
 //可能不会使用pixijs原生交互, 一是在多全屏layer情况下的触发问题, 二是使交互判定尽量一致, 如键盘/鼠标/手柄等
 class Input { 
   static async setup() {
     let mapper = await Assets.load("../core/input.yaml");
     const pf = { passive: false };
-    this.clearAllMotion(config);
     
     document.addEventListener("keydown", this._onKeyDown.bind(this));
     document.addEventListener("keyup", this._onKeyUp.bind(this));
@@ -16,33 +39,24 @@ class Input {
     document.addEventListener("pointerup", this._onPointerUp.bind(this));
     document.addEventListener("wheel", this._onWheel.bind(this), pf);
     window.addEventListener("blur", this.clear.bind(this));
-    this.clear(mapper);
-    this.setRepeatWait();
-    // this.clampDirection();
-  }
-
-  clearAllMotion(config){
-    console.warn(config);
-    for(const platform in config){
-      
-    }
-  }
-
-  static clear(mapper) {
+    this.clear();
     this._mapper = mapper;
+    this._repeatInterval = 100;
+  }
+
+  static clear() {
     this._currentState = new Map();
     this._gcing = new Map();
-    this._pointer = { _x: 0, _y: 0, x: 0, y: 0, wx: 0, wy: 0, _wx: 0, _wy: 0, ids: new Map() };
+    this._pointer = new Pointer();
   }
 
   static _onKeyDown(e) {
-    if (e.repeat) {
-      return;
-    }
+    if (e.repeat) return;
     let { key, keyCode } = e;
     key = key.toLocaleLowerCase();
     this._currentState.set(key, { press: -1 });
-
+    InputEmitter.emit("keydown", key);
+    console.warn(this.mapper, e);
   }
 
   static _onKeyUp(e) {
@@ -54,6 +68,7 @@ class Input {
       this._gcing.set(key, data);
     }
     this._currentState.delete(key);
+    InputEmitter.emit("keyup", key);
   }
 
   static pointerKey(e) {
@@ -74,33 +89,42 @@ class Input {
   static _onPointerDown(e) {
     let key = this.pointerKey(e);
     this._onKeyDown({ key, keyCode: 0 });
+    InputEmitter.emit("pointerdown", this.pointer);
+    console.warn(this.mapper, e);
   }
 
   static _onPointerMove(e) {
-
+    InputEmitter.emit("pointermove", this.pointer);
   }
 
   static _onPointerUp(e) {
-
     let key = this.pointerKey(e);
     this._onKeyUp({ key, keyCode: 0 });
+    InputEmitter.emit("pointerup", this.pointer);
   }
 
   static _onWheel(e) {
     this._pointer._wx += e.deltaX;
     this._pointer._wy += e.deltaY;
+    InputEmitter.emit("wheel", this.pointer);
   }
 
   static get mapper(){
-    return this._mapper;
+    const userAgent = navigator.userAgent;
+    if(/Win/i.test(userAgent)){
+      return this._mapper.win64;
+    }
+    return this._mapper.win64;
   }
 
   static get pointer() {
-    return { x, y, wx, wy } = this._pointer;
+    const { x, y, wx, wy } = this._pointer;
+    return { x, y, wx, wy };
   }
 
   static get wheel() {
-    return { wx, wy } = this._pointer;
+    const { wx, wy } = this._pointer;
+    return { wx, wy };
   }
 
   static set repeatInterval(value = 200) {
@@ -111,6 +135,7 @@ class Input {
   }
 
   static update(delta) {
+    if(!this._currentState) return;
     // 更新未释放的
     this._currentState.forEach((pressing, key) => {
       if (pressing.press < 0) {
@@ -152,6 +177,10 @@ class Input {
   }
 
   static isTriggered(key) {
+    if(key.parent == STATIC){
+      let state = this._currentState.get(key.key);
+      return state && state.press == 0;
+    }
     const data = this.mapper[key];
     if(!data) return;
     for (let k in data) {
@@ -163,7 +192,11 @@ class Input {
   }
 
   static isPressed(key, time = 300) {
-    const data = this.getMapper()[key];
+    if(key.parent == STATIC){
+      let state = this._currentState.get(key.key);
+      return state && state.press >= time;
+    }
+    const data = this.mapper[key];
     if(!data) return;
     for (let k in data) {
       let p = this.isPressed(k, time);
@@ -176,22 +209,11 @@ class Input {
     return state && state.press >= time;
   }
 
-
-  static hitTest(displayObject) {
-    let rect = displayObject.getBounds();
-    const { x, y } = this._pointer;
-    let inside = rect.contains(x, y);
-    return inside;
-  }
-
-  static hitTestRect(x, y, w, h) {
-    let rect = new Rectangle(x, y, w, h);
-    const { x, y } = this._pointer;
-    let inside = rect.contains(x, y);
-    return inside;
-  }
-
   static isReleased(key) {
+    if(key.parent == STATIC){
+      let state = this._gcing.get(key.key);
+      return state && state.press == 0;
+    }
     const data = this.mapper[key];
     if(!data) return;
     for (let k in data) {
@@ -204,7 +226,18 @@ class Input {
   }
 
   static isRepeated(key, time = this.repeatInterval) {
-    const data = this.getMapper()[key];
+    if(key.parent == STATIC){
+      let trigger = this.isTriggered(key.key);
+      let gcing = this._gcing.get(key.key);
+      if (key.key == 'm0' && trigger) {
+        console.log(gcing);
+      }
+      if (time) {
+        return trigger && gcing && (gcing.press >= -time);
+      }
+      return trigger && gcing;
+    }
+    const data = this.mapper[key];
     if(!data) return;
     for (let k in data) {
       let r = this.isRepeated(k, time);
@@ -212,15 +245,28 @@ class Input {
     }
     let trigger = this.isTriggered(key);
     let gcing = this._gcing.get(key);
-    if (key == 'm0' && trigger) {
-      console.log(gcing);
-    }
+    
     if (time) {
       return trigger && gcing && (gcing.press >= -time);
     }
     return trigger && gcing;
   }
 
+  // 性能节省, 不使用pixi的hitTest
+  static hitTest(e) { 
+    let rect = e.getBounds();
+    return this.hitTestRect(rect.x, rect.y, rect.width, rect.height);
+  }
+
+  static hitTestRect(x0, y0, w, h) {
+    let rect = new Rectangle(x0, y0, w, h);
+    const { x, y } = this._pointer;
+    let inside = rect.contains(x, y);
+    return inside;
+  }
+
+  
+
 }
 
-export { Input }
+export { Input, InputEmitter, STATIC }

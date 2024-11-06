@@ -1,0 +1,20 @@
+Flat:
+  x1:
+    font:
+      fontFamily: Consolas
+      fontSize: 17
+      fill: 0x334455
+    color: 0xaaffcc
+  x2:
+    font:
+      fontFamily: Consolas
+      fontSize: 24
+      fill: 0x334455
+    color: 0xffaacc 
+  x3:
+    font:
+      fontFamily: Consolas
+      fontSize: 24
+      fill: 0x334455
+    color: 0xaabbff 
+  

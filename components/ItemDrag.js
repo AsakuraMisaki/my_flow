@@ -2,6 +2,7 @@ import { Assets, Matrix, Rectangle, RenderTexture, Sprite } from "pixi.js";
 import { Component } from "../core/Entity";
 import { Editor, app, editor, renderer, stage } from "../core/editor";
 import { snap } from "../core/camera";
+import { STATIC, Input, InputEmitter } from "../core/input";
 
 
 
@@ -9,9 +10,7 @@ class Drag extends Component{
   constructor(){
     super();
     this.target = null;
-    this._pd = this.pointerdown.bind(this);
-    this._pm = this.pointermove.bind(this);
-    this._pu = this.pointerup.bind(this);
+    this.preventDefault = false;
   }
 
   get global(){
@@ -21,41 +20,51 @@ class Drag extends Component{
     Drag._global = v;
   }
 
-  onAdd(){
-    super.onAdd();
-    this.E.on("pointerdown", this._pd);
-    this.E.interactive = true;
+  update(){
+    let start = this.updateDragStart();
+    if(!start) return;
+    let end = this.updateDragEnd();
+    if(end) return;
+    this.updateDrag();
   }
 
-  async pointerdown(e) {
-    if (this.global) return;
-    this.target = this.global = e.currentTarget;
+  updateDragStart(){
+    if(this.target) return true;
+    let pointerdown = Input.isTriggered(STATIC.MOUSE0);
+    if(!pointerdown) return;
+    if(!Input.hitTest(this.E)) return;
+    this.target = this.global = this.E;
+    this.E.emit("dragstart", this.target);
+    this.preventDefault ? null : this.defaultDragStart();
+  }
+  async defaultDragStart(){
     let s = await snap(this.target);
     this.snap = s;
     s.alpha = 0.5;
     let layer = editor.getLayer("ui");
-    stage.addChild(this.snap);
-    layer.on("pointermove", this._pm);
-    layer.once("pointerup", this._pu);
-    layer.once("pointerupoutside", this._pu);
+    layer.addChild(this.snap);
   }
-
-  pointermove(e){
+  updateDrag(){
+    this.updateDragSnap();
+    this.E.emit("drag", this.target);
+  }
+  updateDragSnap(){
     if(!this.snap) return;
-    // console.log(e.global);
-    this.snap.x = e.global.x;
-    this.snap.y = e.global.y;
+    let pointer = Input.pointer;
+    this.snap.x = pointer.x;
+    this.snap.y = pointer.y;
   }
-
-  pointerup(e){
-    this.snap.remove();
-    this.snap = null;
-    this.target = this.global = null;
-    let layer = editor.getLayer("ui");
-    layer.off("pointerupoutside", this._pu);
-    layer.off("pointermove", this._pm);
+  updateDragEnd(){
+    let pointerup = (!Input.isPressed(STATIC.MOUSE0, 0));
+    if(!pointerup) return;
+    if(this.global == this.target){
+      this.global = null;
+    }
+    this.E.emit("dragend", this.target);
+    this.target = null;
+    this.snap ? (this.snap.destroy() && this.snap.remove()) : null;
+    return true;
   }
-
 }
 
 Drag._global = null;

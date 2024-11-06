@@ -1,4 +1,4 @@
-class ev {
+class EV {
   constructor() {
     this.events = new Map();
   }
@@ -61,4 +61,4 @@ class ev {
   }
 }
 
-export default ev;
+export {EV};

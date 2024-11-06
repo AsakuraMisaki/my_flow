@@ -51,6 +51,7 @@ const Entity = {
     this._timeScale = 1;
     this._tags = new Set();
     this._components = new Map();
+    this._pause = false;
   },
 
   delta: {
@@ -133,12 +134,12 @@ const Entity = {
     for (let i = 0; i < length; i++) {
       let c = this.children[i];
       if (c._destroy) {
-        if(!c._onDestroy){
-          c.onDestroy().then(()=>{
-            this.removeChildAt(i);
-          });
-        }
+        let index = i;
         i--;
+        if(c._onDestroy) continue;
+        c.onDestroy().then(()=>{
+          this.removeChildAt(index);
+        });
         continue;
       }
       c.update ? c.update(delta) : null;
@@ -148,20 +149,27 @@ const Entity = {
   _updateComponents(delta) {
     this._components.forEach((c, id, map)=>{
       if(c._destroy){
-        if(!c._onDestroy){
-          c.onDestroy().then(()=>{
-            map.delete(id);
-            c._E = null;
-          })
-        }
+        if(c._onDestroy) return;
+        c.onDestroy().then(()=>{
+          map.delete(id);
+          c._E = null;
+        })
         return;
       }
       c.update ? c.update(delta) : null;
     })
   },
 
+  pause(){
+    this._pause = true;
+  },
+
+  resume(){
+    this._pause = false;
+  },
 
   update(delta) {
+    if(this._pause) return;
     this._delta = delta;
     let d = this.delta;
     this.onUpdate(d);
