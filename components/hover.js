@@ -9,24 +9,20 @@ class Hover extends ItemAble{
     super();
   }
 
+  onTargetChange(current, old){
+    current ? this.emit("hoverin", current) : null;
+    old ? this.emit("hoverout", old) : null;
+    super.onTargetChange(current, old);
+  }
+
   updateHover(){
-    let hit = this.hitTest(this._lastTarget);
-    if(!this._lastHit && hit){
-      this.target = this.E;
-      this.emit("hoverin", this.target, this._lastTarget);
-    }
-    else if(!hit && this._lastHit){
-      this.emit("hoverout", this.target, this._lastTarget);
-      this.target = null;
-    }
-    else if(hit && this._lastHit){
+    if(this.target){
       this.emit("hover", this.target);
     }
-    this._lastHit = hit;
-    return this._lastHit;
   }
 
   onUpdate(delta){
+    this.updateHitTest();
     this.updateHover();
     super.onUpdate(delta);
   }

@@ -6,7 +6,7 @@ Container.prototype.remove = function(){
   this.parent.removeChild(this);
 }
 Texture.prototype.cut = function(rect){
-  this.orig = this.frame = rect;
+  this.frame = rect;
   this.updateUvs();
 }
 

@@ -5,9 +5,8 @@ class ItemAble extends Component{
   constructor(){
     super();
     this._target = null;
-    this._lastTarget = null;
-    this._lastHit = false;
     this._itemAble = false;
+    this._itemOnly = false;
   }
   
   get target(){
@@ -15,23 +14,23 @@ class ItemAble extends Component{
   }
   set target(e){
     if(this._target != e){
-      this.onTargetChange(this._target, e);
+      this.onTargetChange(e, this._target);
       this._target = e;
     }
   }
 
-  onTargetChange(current, old){
-    
-  }
+  onTargetChange(){ };
 
-  hitTest(){
-    if(!Input.hitTest(this.E)) return;
-    let target = this.target;
-    if((target != this.E) && target.parent == this.E){
-      return Input.hitTest(target);
+  updateHitTest(){
+    let hit = Input.hitTest(this.E);
+    if(!hit){
+      this.target = null;
     }
-    else{
-      return this.processItemTarget();
+    else if(this._itemAble && hit){
+      this.processItemTarget();
+    }
+    else if(hit){
+      this.target = this.E;
     }
   }
 
@@ -41,8 +40,8 @@ class ItemAble extends Component{
     let length = children.length;
     let target = e;
     for(let i=0; i<length; i++){
+      if(!Input.hitTest(children[i])) continue;
       target = children[i];
-      if(!this.hitTest(t)) continue;
       break;
     }
     this.target = target;
@@ -50,12 +49,16 @@ class ItemAble extends Component{
   }
 
   onUpdate(delta){
-    // this._lastTarget = this.target;
     super.onUpdate(delta);
   }
 
-  itemAble(){
-    this._itemAble = true;
+  itemAble(value = true){
+    this._itemAble = value;
+    return this;
+  }
+
+  itemOnly(value = true){
+    this._itemOnly = value;
     return this;
   }
 }

@@ -50,36 +50,25 @@ class Editor extends ContainerEntity{
     let texture = await Assets.load("../res/icons.png");
     let baseGrid = ui.addComponent("grid", new Grid(1, 0, 0));
     let testContainer = new ContainerEntity();
-    let grid = testContainer.addComponent("grid", new Grid(1, 0, 20));
-    let hover = testContainer.addComponent("hover", new Hover().itemAble());
-    hover.on("hoverin", (current, old)=>{
-      if(current == testContainer){
-        console.log("parent hover in");
-      }
-      else if(current){
-        console.log("hover in", current, old);
-      }
+    let grid = testContainer.addComponent("grid", new Grid(1, 0, 0));
+    let hover = testContainer.addComponent("hover", new Hover().itemAble().itemOnly());
+    hover.on("hoverin", (current)=>{
+      if(current == testContainer) return;
+      current.alpha = 1;
     })
-    hover.on("hoverout", (current, old)=>{
-      if(current == testContainer){
-        console.log("parent hover out");
-      }
-      else if(current){
-        console.log("hover out", current, old);
-      }
+    hover.on("hoverout", (old)=>{
+      if(old == testContainer) return;
+      old.alpha = 0.5;
     })
     hover.on("hover", (current)=>{
-      // if(current == testContainer){
-      //   console.log("parent hover ing");
-      // }
-      // else if(current){
-      //   console.log("hover ing", current);
-      // }
+      // console.log(current == testContainer);
     })
     for(let i=0; i<10; i++){
       let tex = new Texture(texture);
-      // tex.cut(new Rectangle(0, 0, 80, 80));
+      
       let t = new SpriteEntity(tex);
+      t.width = t.height = 100;
+      tex.cut(new Rectangle(0, 0, 16, 16));
       console.log(tex);
       // t.addComponent("drag", new Drag());
       
