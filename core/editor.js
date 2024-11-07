@@ -82,8 +82,6 @@ class Editor extends ContainerEntity{
 
 
     this.test1 = new SpriteEntity(texture);
-    this.test1.addComponent("hover", Hover);
-    this.test1.alpha = 0.5;
     
     ui.addChild(testContainer, this.test1);
     grid.on("transform", ()=>{

@@ -204,6 +204,10 @@ class Component extends EV{
     return this.E._delta * this.E._timeScale;
   }
 
+  async ready(){
+    this.emit("ready");
+  }
+
   destroy(){
     this._destroy = true;
   }

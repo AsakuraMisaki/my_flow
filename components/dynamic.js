@@ -17,7 +17,8 @@ class Dynamic extends Component{
   set source(v){
     if(!Array.isArray(v)) return;
     if(this._source == v) return; 
-    this.E.emit("c.dynamic.start");
+    this.emit("start");
+    this.emit("change", v, this._source);
     this._source = v;
     this.refresh();
   }
@@ -28,7 +29,7 @@ class Dynamic extends Component{
     source.forEach(()=>{
       
     })
-    this.E.emit("c.dynamic.end");
+    this.emit("end");
   }
   
 }

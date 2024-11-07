@@ -8,9 +8,10 @@ async function snap(displayObject, resolution=0.5) {
     resolution
   });
   const {x, y, width, height} = displayObject.getBounds();
- 
-  let sprite = new Sprite(texture);
+  
   texture.frame = new Rectangle(0, 0, 20, 20);
+  let sprite = new Sprite(texture);
+  
   // texture.update();
   
   return sprite;
