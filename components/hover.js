@@ -1,34 +1,38 @@
 import { Component } from "../core/Entity";
 import { Input, STATIC } from "../core/input";
-import { Drag } from "./drag";
+import { ItemAble } from "./itemable";
 
 
-class Hover extends Component{
+
+class Hover extends ItemAble{
   constructor(){
     super();
-    this._lastHit = false;
   }
 
   updateHover(){
-    let hit = Input.hitTest(this.E);
+    let hit = this.hitTest(this._lastTarget);
     if(!this._lastHit && hit){
-      this.E.emit("hoverin");
+      this.target = this.E;
+      this.emit("hoverin", this.target, this._lastTarget);
     }
     else if(!hit && this._lastHit){
-      this.E.emit("hoverout");
+      this.emit("hoverout", this.target, this._lastTarget);
+      this.target = null;
     }
     else if(hit && this._lastHit){
-      this.E.emit("hover");
+      this.emit("hover", this.target);
     }
     this._lastHit = hit;
     return this._lastHit;
   }
 
-  onUpdate(){
-    this.updateHover(this._lastHit);
+  onUpdate(delta){
+    this.updateHover();
+    super.onUpdate(delta);
   }
 
 }
+Hover._global = null;
 
 export { Hover };
 

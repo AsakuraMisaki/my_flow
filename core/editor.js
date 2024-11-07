@@ -1,4 +1,4 @@
-import { Application, Assets, Texture, Container } from "pixi.js";
+import { Application, Assets, Texture, Container, Rectangle } from "pixi.js";
 import { ContainerEntity, Entity, SpriteEntity } from "./Entity";
 import { Drag } from "../components/drag";
 import { Drop } from "../components/drop";
@@ -6,6 +6,7 @@ import { Layer } from "./layer";
 import { Input } from "./input";
 import { YAML } from "./yaml";
 import { Hover } from "../components/hover";
+import { Grid, Layout } from "../components/layout";
 
 
 class Editor extends ContainerEntity{
@@ -46,16 +47,60 @@ class Editor extends ContainerEntity{
   async onReady(){
     await Input.setup();
     let ui = this.addLayer("ui", { zIndex:8 });
-    const texture = await Assets.load("../res/icons.svg");
-    this.test = new SpriteEntity(texture);
-    this.test.addComponent("drag", Drag);
-    this.test1 = new SpriteEntity(texture);
+    let texture = await Assets.load("../res/icons.png");
+    let baseGrid = ui.addComponent("grid", new Grid(1, 0, 0));
+    let testContainer = new ContainerEntity();
+    let grid = testContainer.addComponent("grid", new Grid(1, 0, 20));
+    let hover = testContainer.addComponent("hover", new Hover().itemAble());
+    hover.on("hoverin", (current, old)=>{
+      if(current == testContainer){
+        console.log("parent hover in");
+      }
+      else if(current){
+        console.log("hover in", current, old);
+      }
+    })
+    hover.on("hoverout", (current, old)=>{
+      if(current == testContainer){
+        console.log("parent hover out");
+      }
+      else if(current){
+        console.log("hover out", current, old);
+      }
+    })
+    hover.on("hover", (current)=>{
+      // if(current == testContainer){
+      //   console.log("parent hover ing");
+      // }
+      // else if(current){
+      //   console.log("hover ing", current);
+      // }
+    })
+    for(let i=0; i<10; i++){
+      let tex = new Texture(texture);
+      // tex.cut(new Rectangle(0, 0, 80, 80));
+      let t = new SpriteEntity(tex);
+      console.log(tex);
+      // t.addComponent("drag", new Drag());
+      
+      // let index = i;
+      // t.on("c.drag.start", ()=>{
+      //   console.log(t, index);
+      // })
+      testContainer.addChild(t);
+    }
+    grid.refresh();
 
+
+    this.test1 = new SpriteEntity(texture);
     this.test1.addComponent("hover", Hover);
-    
-    this.test1.x = 300;
     this.test1.alpha = 0.5;
-    ui.addChild(this.test, this.test1);
+    
+    ui.addChild(testContainer, this.test1);
+    grid.on("transform", ()=>{
+      console.log(baseGrid.transforming);
+      baseGrid.refresh();
+    })
   }
 }
 

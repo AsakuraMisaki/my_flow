@@ -19,10 +19,10 @@ class Drop extends Component{
     if(!this._lastGlobal) return;
     let hit = Input.hitTest(this.E);
     if(!this._lastHit && hit){
-      this.E.emit("dragover", this._lastGlobal);
+      this.E.emit("c.drag.over", this._lastGlobal);
     }
     else if(!hit && this._lastHit){
-      this.E.emit("dragleave", this._lastGlobal);
+      this.E.emit("c.drag.leave", this._lastGlobal);
     }
     this._lastHit = hit;
     return this._lastHit;
@@ -32,7 +32,7 @@ class Drop extends Component{
     if(!hit || !this._lastGlobal) return;
     let pointerup = !Input.isPressed(STATIC.MOUSE0, 0);
     if(!pointerup) return;
-    this.E.emit("drop", this._lastGlobal);
+    this.E.emit("c.drop", this._lastGlobal);
     this._lastGlobal = null;
   }
 

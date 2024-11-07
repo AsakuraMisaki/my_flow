@@ -1,8 +1,13 @@
-import { Container, Sprite, Text, Transform } from "pixi.js";
+import { Container, Sprite, Text, Texture, Transform } from "pixi.js";
+import { EV } from "./ev";
 
 Container.prototype.remove = function(){
   if(!this.parent) return;
   this.parent.removeChild(this);
+}
+Texture.prototype.cut = function(rect){
+  this.orig = this.frame = rect;
+  this.updateUvs();
 }
 
 class ContainerEntity extends Container{
@@ -113,11 +118,13 @@ const Entity = {
     return temp;
   },
 
-  async addComponent(id, targetClass, ...args) {
-    let target = new targetClass();
+  addComponent(id, target) {
+    if(typeof(target) == "function" && target.prototype instanceof Component){
+      target = new target();
+    }
     target._E = this;
-    await target.onAdd(...args);
     this._components.set(id, target);
+    return target;
   },
 
   removeComponent(id) {
@@ -130,7 +137,7 @@ const Entity = {
   },
 
   _updateChildren(delta) {
-    let children = Array.from(this.children);
+    let children = Array.from(this.children).reverse();
     let length = children.length;
     for (let i = 0; i < length; i++) {
       let c = children[i];
@@ -181,8 +188,9 @@ const Entity = {
   }
 }
 
-class Component{
+class Component extends EV{
   constructor(){
+    super();
     this._E = null;
     this._destroy = false;
     this._pause = false;
@@ -198,10 +206,6 @@ class Component{
 
   destroy(){
     this._destroy = true;
-  }
-
-  async onAdd(){
-    
   }
 
   pause(){

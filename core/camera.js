@@ -1,17 +1,18 @@
-import { RenderTexture, Sprite } from "pixi.js";
-import { renderer } from "./editor";
+import { Rectangle, RenderTexture, Sprite, Texture } from "pixi.js";
+import { app, renderer, stage } from "./editor";
 
 async function snap(displayObject, resolution=0.5) {
-    
-  let bound = displayObject.getBounds();
-  const { x, y, width, height } = bound;
-  const renderTexture = RenderTexture.create({
-    width: width,
-    height: height,
+
+  let texture = await renderer.extract.texture({
+    target: stage,
     resolution
   });
-  renderer.render({ container:displayObject, target:renderTexture });
-  let sprite = new Sprite(renderTexture);
+  const {x, y, width, height} = displayObject.getBounds();
+ 
+  let sprite = new Sprite(texture);
+  texture.frame = new Rectangle(0, 0, 20, 20);
+  // texture.update();
+  
   return sprite;
 };
 

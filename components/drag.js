@@ -9,9 +9,10 @@ import { STATIC, Input, InputEmitter } from "../core/input";
 class Drag extends Component{
   constructor(){
     super();
-    this.target = null;
+    this._target = null;
     this.preventDefault = false;
     this._snapTarget = null;
+    this._itemMode = false;
   }
 
   get global(){
@@ -19,6 +20,29 @@ class Drag extends Component{
   }
   set global(v){
     Drag._global = v;
+  }
+  get target(){
+    return this._target;
+  }
+  set target(v){
+    if(this._itemMode && v){
+      v = this.processItemTarget() || v;
+    }
+    this._target = v;
+  }
+
+  processItemTarget(){
+    let children = Array.from(this.E.children);
+    let length = children.length;
+    for(let i=0; i<length; i++){
+      let t = children[i];
+      if(!Input.hitTest(t)) continue;
+      return t;
+    }
+  }
+
+  itemMode(){
+    this._itemMode = true;
   }
 
   setSnapTarget(e){
@@ -34,12 +58,13 @@ class Drag extends Component{
   }
 
   updateDragStart(){
-    if(this.target) return true;
+    if(this.target && this.global == this.target) return true;
+    else if(this.global) return;
     let pointerdown = Input.isTriggered(STATIC.MOUSE0);
     if(!pointerdown) return;
     if(!Input.hitTest(this.E)) return;
     this.target = this.global = this.E;
-    this.E.emit("dragstart", this.target);
+    this.E.emit("c.drag.start", this.target);
     this.preventDefault ? null : this.defaultDragStart();
   }
   async defaultDragStart(){
@@ -51,7 +76,7 @@ class Drag extends Component{
   }
   updateDrag(){
     this.updateDragSnap();
-    this.E.emit("drag", this.target);
+    this.E.emit("c.drag.ing", this.target);
   }
   updateDragSnap(){
     if(!this.snap) return;
@@ -65,7 +90,7 @@ class Drag extends Component{
     if(this.global == this.target){
       this.global = null;
     }
-    this.E.emit("dragend", this.target);
+    this.E.emit("c.drag.end", this.target);
     this.target = null;
     this.snap ? (this.snap.destroy() && this.snap.remove()) : null;
     return true;
