@@ -5,22 +5,25 @@ import { BaseContainer, BaseSprite } from "./displayObject";
 class AnimationLayer extends Component{
   constructor(animationDescription){
     super();
-    this.setup(animationDescription);
+    this._animationDescription = animationDescription;
   }
 
-  async setup(animationDescription){
-    let des = await Assets.load(animationDescription);
+  async ready(){
+    let des = await Assets.load(this._animationDescription);
     this.setupAnimationDescription(des);
-    super.setup();
   }
-  setupAnimationDescription(des){
+  setupAnimationDescription(){
+
+  }
+
+  onReady(){
+    super.onReady();
 
   }
 
   get player(){
     return this.E;
   }
-
   get current(){
     return this.animationDescription.get(this._current);
   }

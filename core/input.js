@@ -11,19 +11,15 @@ for(let key in STATIC){
 const InputEmitter = new EV();
 class Pointer{
   constructor(){
-    this._x = 0;
+    this.x = -Infinity;
+    this.y = 0;
+    this._x = -Infinity;
     this._y = 0;
     this._wx = 0;
     this._wy = 0;
     this.wx = 0;
     this.wy = 0;
     this.ids = new Map();
-  }
-  get x(){
-    return this._x;
-  }
-  get y(){
-    return this._y;
   }
 }
 //可能不会使用pixijs原生交互, 一是在多全屏layer情况下的触发问题, 二是使交互判定尽量一致, 如键盘/鼠标/手柄等
@@ -38,17 +34,18 @@ class Input {
     document.addEventListener("pointermove", this._onPointerMove.bind(this));
     document.addEventListener("pointerup", this._onPointerUp.bind(this));
     document.addEventListener("wheel", this._onWheel.bind(this), pf);
-    window.addEventListener("blur", this.clear.bind(this));
+    window.addEventListener("blur", this.clear.bind(this, true));
     this.clear();
     this._mapper = mapper;
     this._repeatInterval = 100;
   }
 
-  static clear() {
+  static clear(blur=false) {
     this._hitTestCaches = new Map();
     this._currentState = new Map();
     this._gcing = new Map();
     this._pointer = new Pointer();
+    this._blur = blur;
   }
 
   static _onKeyDown(e) {
@@ -170,9 +167,17 @@ class Input {
     this._pointer.wx = this._pointer._wx;
     this._pointer.wy = this._pointer._wy;
 
+    this._pointer.x = this._pointer._x;
+    this._pointer.y = this._pointer._y;
+
     this._pointer._wx = 0;
     this._pointer._wy = 0;
 
+  }
+
+  static isPointerMove() {
+    const { x, y, _x, _y } = this._pointer;
+    return ( (x != _x) || (y != _y) );
   }
 
   static isAnyTriggered(mouse = false) {

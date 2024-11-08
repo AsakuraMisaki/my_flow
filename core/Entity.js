@@ -51,12 +51,14 @@ const MixIn = function MixIn(targetClass, targetObject, ignores=[]){
 
 const Entity = {
 
-  asEntity(){
+  async asEntity(){
     this._delta = 0;
     this._timeScale = 1;
     this._tags = new Set();
     this._components = new Map();
-    this._pause = false;
+    this._pause = true;
+    await this.ready();
+    this.onReady();
   },
 
   delta: {
@@ -69,8 +71,13 @@ const Entity = {
     this._destroy = true;
   },
 
-  async onReady() {
+  async ready() {
     
+  },
+
+  onReady() {
+    this._pause = false;
+    this.emit("ready");
   },
 
   async onDestroy() {
@@ -181,6 +188,7 @@ const Entity = {
     this._delta = delta;
     let d = this.delta;
     this.onUpdate(d);
+    this.emit("update", delta);
   },
 
   __bp__(data) { //blue print default support
@@ -191,20 +199,30 @@ const Entity = {
 class Component extends EV{
   constructor(){
     super();
+    this.setup();
+  }
+
+  async setup(){
     this._E = null;
     this._destroy = false;
-    this._pause = false;
+    this._pause = true;
+    await this.ready();
+    this.onReady();
   }
 
   get E(){
     return this._E;
   }
-
   get delta(){
     return this.E._delta * this.E._timeScale;
   }
 
-  async ready(){
+  async ready(){ 
+    
+  }
+
+  onReady(){
+    this._pause = false;
     this.emit("ready");
   }
 
@@ -231,6 +249,7 @@ class Component extends EV{
   update(delta){
     if(this._pause) return;
     this.onUpdate(delta);
+    this.emit("update", delta);
   }
 
 }

@@ -10,9 +10,10 @@ class Layer extends ContainerEntity{
   }
 
   async onReady(){
-    const texture = await Assets.load("../res/icons.svg");
-    this.test = new BaseSprite(texture);
-    this.addChild(this.test);
+    super.onReady();
+    // const texture = await Assets.load("../res/icons.svg");
+    // this.test = new BaseSprite(texture);
+    // this.addChild(this.test);
     // this.test.scale.x = this.test.scale.y = 10;
   }
 }

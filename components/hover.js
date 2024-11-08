@@ -22,6 +22,7 @@ class Hover extends ItemAble{
   }
 
   onUpdate(delta){
+    if(!Input.isPointerMove()) return;
     this.updateHitTest();
     this.updateHover();
     super.onUpdate(delta);

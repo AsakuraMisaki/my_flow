@@ -7,6 +7,7 @@ import { Input } from "./input";
 import { YAML } from "./yaml";
 import { Hover } from "../components/hover";
 import { Grid, Layout } from "../components/layout";
+import { ScreenPrinter } from "./utils";
 
 
 class Editor extends ContainerEntity{
@@ -45,48 +46,54 @@ class Editor extends ContainerEntity{
   }
 
   async onReady(){
+    super.onReady();
     await Input.setup();
     let ui = this.addLayer("ui", { zIndex:8 });
     let texture = await Assets.load("../res/icons.png");
     let baseGrid = ui.addComponent("grid", new Grid(1, 0, 0));
     let testContainer = new ContainerEntity();
-    let grid = testContainer.addComponent("grid", new Grid(1, 0, 0));
+    let grid = testContainer.addComponent("grid", new Grid(20, 10, 10));
     let hover = testContainer.addComponent("hover", new Hover().itemAble().itemOnly());
-    hover.on("hoverin", (current)=>{
-      if(current == testContainer) return;
-      current.alpha = 1;
-    })
-    hover.on("hoverout", (old)=>{
-      if(old == testContainer) return;
-      old.alpha = 0.5;
-    })
-    hover.on("hover", (current)=>{
-      // console.log(current == testContainer);
-    })
-    for(let i=0; i<10; i++){
+    
+    for(let i=0; i<1000; i++){
       let tex = new Texture(texture);
       
       let t = new SpriteEntity(tex);
-      t.width = t.height = 100;
-      tex.cut(new Rectangle(0, 0, 16, 16));
-      console.log(tex);
+      // t.width = t.height = Math.random() * 80 + 80;
+      // tex.cut(new Rectangle(0, 0, 16, 16));
+      // console.log(tex);
       // t.addComponent("drag", new Drag());
       
       // let index = i;
       // t.on("c.drag.start", ()=>{
       //   console.log(t, index);
       // })
+      
       testContainer.addChild(t);
     }
     grid.refresh();
 
 
-    this.test1 = new SpriteEntity(texture);
+    this.test1 = new ScreenPrinter();
     
-    ui.addChild(testContainer, this.test1);
+    ui.addChild(this.test1, testContainer);
+    testContainer._timeScale = 0;
     grid.on("transform", ()=>{
-      console.log(baseGrid.transforming);
+      testContainer._timeScale += 0.001;
       baseGrid.refresh();
+    })
+    grid.on("transformend", ()=>{
+      hover.on("hoverin", (current)=>{
+        // if(current == testContainer) return;
+        current.alpha = 0.5;
+      })
+      hover.on("hoverout", (old)=>{
+        // if(old == testContainer) return;
+        old.alpha = 1;
+      })
+      hover.on("hover", (current)=>{
+        // console.log(current == testContainer);
+      })
     })
   }
 }
@@ -120,4 +127,4 @@ stage.addChild(editor);
 
 export { Editor, app, renderer, stage, editor };
 
-editor.onReady();
+
