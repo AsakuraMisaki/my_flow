@@ -7,6 +7,7 @@ class ItemAble extends Component{
     this._target = false;
     this._itemAble = false;
     this._itemOnly = false;
+    this._itemGroup = null;
   }
   
   get target(){
@@ -42,7 +43,7 @@ class ItemAble extends Component{
       // console.log(0);
       return this.target;
     }
-    let children = Array.from(e.children).reverse();
+    let children = this._itemGroup ? Array.from(this._itemGroup) : Array.from(e.children).reverse();
     let length = children.length;
     let target = this._itemOnly ? false : e; //when itemOnly
     //[task?] the most cost in an itemable component
@@ -60,6 +61,10 @@ class ItemAble extends Component{
 
   onUpdate(delta){
     super.onUpdate(delta);
+  }
+
+  itemGroup(_group){
+    this._itemGroup = _group;
   }
 
   itemAble(value = true){

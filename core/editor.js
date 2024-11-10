@@ -55,7 +55,7 @@ class Editor extends ContainerEntity{
     let grid = testContainer.addComponent("grid", new Grid(20, 10, 10));
     let hover = testContainer.addComponent("hover", new Hover().itemAble().itemOnly());
     
-    for(let i=0; i<1000; i++){
+    for(let i=0; i<10; i++){
       let tex = new Texture(texture);
       
       let t = new SpriteEntity(tex);
@@ -77,9 +77,8 @@ class Editor extends ContainerEntity{
     this.test1 = new ScreenPrinter();
     
     ui.addChild(this.test1, testContainer);
-    testContainer._timeScale = 0;
-    grid.on("transform", ()=>{
-      testContainer._timeScale += 0.001;
+    // testContainer._timeScale = 0;
+    grid.on("transformend", ()=>{
       baseGrid.refresh();
     })
     grid.on("transformend", ()=>{
@@ -105,14 +104,11 @@ await app.init({ background: '#1099bb', resizeTo: window });
 
 // Append the application canvas to the document body
 document.body.appendChild(app.canvas);
-app.stage.eventMode = 'static';
-app.stage.interactive = true;
+
 const renderer = app.renderer;
 const stage = app.stage;
-stage.hitArea = app.screen;
-stage.on("pointerdown", (e)=>{
-  console.warn(e);
-})
+
+
 const update = function(ticker){
   stage.children.forEach((c)=>{
     c.update ? c.update(ticker.deltaMS) : null;
