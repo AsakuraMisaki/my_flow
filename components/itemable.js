@@ -4,10 +4,10 @@ import { Input } from "../core/input";
 class ItemAble extends Component{
   constructor(){
     super();
-    this._target = false;
     this._itemAble = false;
     this._itemOnly = false;
     this._itemGroup = null;
+    this.target = false;
   }
   
   get target(){

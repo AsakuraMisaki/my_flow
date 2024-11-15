@@ -1,4 +1,4 @@
-import { Application, Assets, Texture, Container, Rectangle } from "pixi.js";
+import { Application, Assets, Texture, Container, Rectangle, Graphics, mSDFBit } from "pixi.js";
 import { ContainerEntity, Entity, SpriteEntity } from "./Entity";
 import { Drag } from "../components/drag";
 import { Drop } from "../components/drop";
@@ -59,6 +59,12 @@ class Editor extends ContainerEntity{
       let tex = new Texture(texture);
       
       let t = new SpriteEntity(tex);
+      // t.eventMode = "static";
+      // t.interactive = true;
+      // t.on("pointerdown", (e)=>{
+      //   let hit = Input.hitTestBase(editor);
+      //   console.log(hit);
+      // })
       // t.width = t.height = Math.random() * 80 + 80;
       // tex.cut(new Rectangle(0, 0, 16, 16));
       // console.log(tex);
@@ -83,6 +89,8 @@ class Editor extends ContainerEntity{
     })
     grid.on("transformend", ()=>{
       hover.on("hoverin", (current)=>{
+        
+        console.log(current);
         // if(current == testContainer) return;
         current.alpha = 0.5;
       })
@@ -107,7 +115,18 @@ document.body.appendChild(app.canvas);
 
 const renderer = app.renderer;
 const stage = app.stage;
+// app.stage.eventMode = "static";
+// app.stage.interactive = true;
+// app.stage.hitArea = app.screen;
+let mask = new Graphics();
+mask.rect(0, 0, 500, 500);
+mask.fill(0xffffff, 1);
 
+
+app.stage.addChild(mask);
+// app.stage.on("pointerdown", (e)=>{
+//   console.warn(e);
+// })
 
 const update = function(ticker){
   stage.children.forEach((c)=>{
@@ -120,7 +139,14 @@ window.app = app;
 
 let editor = new Editor();
 stage.addChild(editor);
+editor.mask = mask;
+editor.interactive = true;
+editor.on("pointerdown", (e)=>{
+  console.log(e.target, e.currentTarget, e);
+  let hit = Input.hitTestBase(editor);
+  console.log(hit);
+})
 
-export { Editor, app, renderer, stage, editor };
+export { Editor, app, renderer, stage, editor, Input };
 
 

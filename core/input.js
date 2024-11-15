@@ -1,5 +1,5 @@
 
-import { Assets, Loader, Rectangle, Resolver, extensions } from "pixi.js";
+import { Assets, EventBoundary, Loader, Rectangle, Resolver, extensions } from "pixi.js";
 import { EV } from "./ev";
 import { app } from "./editor";
 
@@ -22,11 +22,71 @@ class Pointer{
     this.ids = new Map();
   }
 }
+class InputEventBoundary extends EventBoundary{
+  constructor(){
+    super();
+  }
+  init(rootTarget){
+    this.rootTarget = rootTarget;
+    this.watchs = new Map();
+    return;
+  }
+  addHitWatch(target, maxDeep=0, testFn=null){
+    let data = this.watchs.get(target);
+    if(!data) data = { maxDeep: 0, ref:0, testFn };
+    data.maxDeep = Math.max(data.maxDeep, maxDeep);
+    data.ref++;
+    this.watchs.set(target, data);
+  } 
+  reduceHitWatch(target){
+    let data = this.watchs.get(target);
+    if(!data) return;
+    data.ref--;
+    if(data.ref <= 0){
+      this.watchs.delete(target);
+    }
+  }
+  getPaths(target){
+
+  }
+  hitPaths(){
+    this.watchs.forEach((data, target)=>{
+      data.paths = this._hitTest([], target);
+    })
+  }
+  _hitTest(caches, currentTarget, point, testFn=this.hitTestFn, pruneFn=this.hitPruneFn){
+    if(pruneFn(currentTarget, point)) return;
+    let children = Array.from(currentTarget.children);
+
+    let length = children.length;
+    for(let i=length-1; i>=0; i--){
+      if(this._hitTest(paths, children[i], point, testFn, pruneFn)){
+
+      }
+    }
+  }
+  hitTest(currentTarget, point, testFn=this.hitTestFn, pruneFn=this.hitPruneFn){
+    if(pruneFn(currentTarget, point)) return;
+    let children = Array.from(currentTarget.children);
+    let length = children.length;
+    for(let i=length-1; i>=0; i--){
+      if(this.hitTest(children[i], point, testFn, pruneFn)){
+
+      }
+    }
+  }
+  
+}
+
 //可能不会使用pixijs原生交互, 一是在多全屏layer情况下的触发问题, 二是使交互判定尽量一致, 如键盘/鼠标/手柄等
 class Input { 
   static async setup() {
     let mapper = await Assets.load("../core/input.yaml");
     const pf = { passive: false };
+
+    this.bound = new EventBoundary(app.stage);
+    this.itemAbles = new Set();
+    
     
     document.addEventListener("keydown", this._onKeyDown.bind(this));
     document.addEventListener("keyup", this._onKeyUp.bind(this));
@@ -100,6 +160,11 @@ class Input {
   static _onPointerMove(e) {
     this.updatePointer(e);
     InputEmitter.emit("pointermove", this.pointer);
+    this.updatePaths();
+  }
+
+  static updatePaths(){
+
   }
 
   static _onPointerUp(e) {
@@ -267,25 +332,23 @@ class Input {
     return trigger && gcing;
   }
 
-  // 性能节省, 不使用pixi的hitTest
+  
   static hitTest(e) { 
     if(this._hitTestCaches.has(e)){ //一帧之内查询多次的处理
       return this._hitTestCaches.get(e);
     }
-    let rect = e.getBounds();
-    let result = this.hitTestRect(rect.x, rect.y, rect.width, rect.height);
+    // let rect = e.getBounds();
+    let result = this.hitTestBase(e);
     this._hitTestCaches.set(e, result);
     return result;
   }
 
-  static hitTestRect(x0, y0, w, h) {
-    let rect = new Rectangle(x0, y0, w, h);
+  static hitTestBase(e) {
+    return false;
     const { x, y } = this._pointer;
-    let inside = rect.contains(x, y);
+    let inside = this.bound.hitPruneFn(e, { x, y });
     return inside;
   }
-
-  
 
 }
 
