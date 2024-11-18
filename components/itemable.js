@@ -1,5 +1,5 @@
 import { Component } from "../core/Entity";
-import { Input } from "../core/input";
+import { Input } from "../core/interaction";
 
 class ItemAble extends Component{
   constructor(){
@@ -7,9 +7,24 @@ class ItemAble extends Component{
     this._itemAble = false;
     this._itemOnly = false;
     this._itemGroup = null;
+    this._testFn = undefined;
+    this._pruneFn = undefined;
     this.target = false;
   }
+
   
+  get testFn(){
+    return this._testFn;
+  }
+  set testFn(fn){
+    return this._testFn = fn;
+  }
+  get pruneFn(){
+    return this._pruneFn;
+  }
+  set pruneFn(fn){
+    this._pruneFn = fn;
+  }
   get target(){
     return this._target;
   }
@@ -22,8 +37,12 @@ class ItemAble extends Component{
 
   onTargetChange(){ };
 
+  hitTest(e, pointer=null){
+    return Input.hitTest(e, pointer, this.testFn, this.pruneFn);
+  }
+
   updateHitTest(){
-    let hit = Input.hitTest(this.E);
+    let hit = this.hitTest(this.E);
     if(!hit){
       this.target = false;
     }
@@ -38,23 +57,20 @@ class ItemAble extends Component{
   processItemTarget(){
     let e = this.E;
     let possibleItem = this.target;
-    if(possibleItem && (possibleItem != e) && Input.hitTest(possibleItem)){ // when hovering the same item
+    if(possibleItem && (possibleItem != e) && this.hitTest(possibleItem)){ // when hovering the same item
       this.target = possibleItem;
-      // console.log(0);
       return this.target;
     }
-    let children = this._itemGroup ? Array.from(this._itemGroup) : Array.from(e.children).reverse();
+    let children = this._itemGroup ? Array.from(this._itemGroup()) : Array.from(e.children).reverse();
     let length = children.length;
     let target = this._itemOnly ? false : e; //when itemOnly
     //[task?] the most cost in an itemable component
-    let i0 = 0;
     for(let i=0; i<length; i++){
-      i0++;
-      if(!Input.hitTest(children[i])) continue;
-      target = children[i];
+      let temp = children[i];
+      if(!this.hitTest(temp)) continue;
+      target = temp;
       break;
     }
-    // console.log(`i0`, i0);
     this.target = target;
     return this.target;
   }
@@ -63,8 +79,15 @@ class ItemAble extends Component{
     super.onUpdate(delta);
   }
 
-  itemGroup(_group){
-    this._itemGroup = _group;
+  itemFilter(f){
+    this._itemFilter = f;
+  }
+
+  itemGroup(group){
+    if(typeof(group) != "function"){
+      this._itemGroup = ()=>group;
+    }
+    this._itemGroup = group;
   }
 
   itemAble(value = true){

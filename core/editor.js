@@ -1,9 +1,9 @@
 import { Application, Assets, Texture, Container, Rectangle, Graphics, mSDFBit } from "pixi.js";
-import { ContainerEntity, Entity, SpriteEntity } from "./Entity";
+import { ContainerEntity, Entity, SpriteEntity, TextEntity } from "./Entity";
 import { Drag } from "../components/drag";
 import { Drop } from "../components/drop";
 import { Layer } from "./layer";
-import { Input } from "./input";
+import { Input } from "./interaction";
 import { YAML } from "./yaml";
 import { Hover } from "../components/hover";
 import { Grid, Layout } from "../components/layout";
@@ -48,6 +48,11 @@ class Editor extends ContainerEntity{
   async onReady(){
     super.onReady();
     await Input.setup();
+    let mask = new Graphics();
+    mask.rect(0, 0, 900, 500);
+    mask.fill(0xffffff, 1);
+    // app.stage.addChild(mask);
+    
     let ui = this.addLayer("ui", { zIndex:8 });
     let texture = await Assets.load("../res/icons.png");
     let baseGrid = ui.addComponent("grid", new Grid(1, 0, 0));
@@ -55,26 +60,24 @@ class Editor extends ContainerEntity{
     let grid = testContainer.addComponent("grid", new Grid(20, 10, 10));
     let hover = testContainer.addComponent("hover", new Hover().itemAble().itemOnly());
     
-    for(let i=0; i<10; i++){
+    // testContainer.mask = mask;
+    // testContainer.interactive = true;
+    // Input.addHitWatch(testContainer, 1);
+    // testContainer.on("pointerdown", (e)=>{
+    //   console.log(e.target, e.currentTarget, e);
+    //   let hit = Input.bound._hitTest(Input.pointer);
+    //   console.log(hit);
+    // })
+    for(let i=0; i<2000; i++){
       let tex = new Texture(texture);
       
+      let container = new Container();
       let t = new SpriteEntity(tex);
-      // t.eventMode = "static";
-      // t.interactive = true;
-      // t.on("pointerdown", (e)=>{
-      //   let hit = Input.hitTestBase(editor);
-      //   console.log(hit);
-      // })
-      // t.width = t.height = Math.random() * 80 + 80;
-      // tex.cut(new Rectangle(0, 0, 16, 16));
-      // console.log(tex);
-      // t.addComponent("drag", new Drag());
-      
-      // let index = i;
-      // t.on("c.drag.start", ()=>{
-      //   console.log(t, index);
-      // })
-      
+      t.anchor.x = 0.5;
+      let tt = new TextEntity("aaaaaaa");
+      tt.x += 200;
+      t.addChild(tt);
+     
       testContainer.addChild(t);
     }
     grid.refresh();
@@ -90,7 +93,7 @@ class Editor extends ContainerEntity{
     grid.on("transformend", ()=>{
       hover.on("hoverin", (current)=>{
         
-        console.log(current);
+        // console.log(current);
         // if(current == testContainer) return;
         current.alpha = 0.5;
       })
@@ -118,12 +121,10 @@ const stage = app.stage;
 // app.stage.eventMode = "static";
 // app.stage.interactive = true;
 // app.stage.hitArea = app.screen;
-let mask = new Graphics();
-mask.rect(0, 0, 500, 500);
-mask.fill(0xffffff, 1);
 
 
-app.stage.addChild(mask);
+
+
 // app.stage.on("pointerdown", (e)=>{
 //   console.warn(e);
 // })
@@ -139,13 +140,7 @@ window.app = app;
 
 let editor = new Editor();
 stage.addChild(editor);
-editor.mask = mask;
-editor.interactive = true;
-editor.on("pointerdown", (e)=>{
-  console.log(e.target, e.currentTarget, e);
-  let hit = Input.hitTestBase(editor);
-  console.log(hit);
-})
+
 
 export { Editor, app, renderer, stage, editor, Input };
 

@@ -1,5 +1,5 @@
 
-import { Assets, EventBoundary, Loader, Rectangle, Resolver, extensions } from "pixi.js";
+import { Assets, EventBoundary, Loader, Point, Rectangle, Resolver, extensions } from "pixi.js";
 import { EV } from "./ev";
 import { app } from "./editor";
 
@@ -22,6 +22,7 @@ class Pointer{
     this.ids = new Map();
   }
 }
+let tempLocalMapping = new Point();
 class InputEventBoundary extends EventBoundary{
   constructor(){
     super();
@@ -29,43 +30,104 @@ class InputEventBoundary extends EventBoundary{
   init(rootTarget){
     this.rootTarget = rootTarget;
     this.watchs = new Map();
+    this.hitTestCaches = new Map();
+    this.tester = { };
+    this.setHitFn();
     return;
   }
   addHitWatch(target, maxDeep=0, testFn=null){
     let data = this.watchs.get(target);
-    if(!data) data = { maxDeep: 0, ref:0, testFn };
+    if(!data) data = { maxDeep: 0, gc:0, testFn, hitTest:undefined };
     data.maxDeep = Math.max(data.maxDeep, maxDeep);
-    data.ref++;
+    data.gc++;
     this.watchs.set(target, data);
   } 
   reduceHitWatch(target){
     let data = this.watchs.get(target);
     if(!data) return;
-    data.ref--;
-    if(data.ref <= 0){
+    data.gc--;
+    if(data.gc <= 0){
       this.watchs.delete(target);
     }
+  }
+  hitTestFn(container, point){
+    if(container.containsPoint){
+      return super.hitTestFn(container, point);
+    }
+    else if(container.getBounds){
+      let bound = container.getBounds();
+      let rect = new Rectangle(bound.x, bound.y, bound.width, bound.height);
+      return rect.contains(point.x, point.y);
+    }
+    return false;
   }
   getPaths(target){
 
   }
-  hitPaths(){
-    this.watchs.forEach((data, target)=>{
-      data.paths = this._hitTest([], target);
-    })
+  setHitFn(testFn=this.hitTestFn, pruneFn=this.hitPruneFn){
+    this.tester.testFn = testFn;
+    this.tester.pruneFn = pruneFn;
   }
-  _hitTest(caches, currentTarget, point, testFn=this.hitTestFn, pruneFn=this.hitPruneFn){
-    if(pruneFn(currentTarget, point)) return;
-    let children = Array.from(currentTarget.children);
 
-    let length = children.length;
-    for(let i=length-1; i>=0; i--){
-      if(this._hitTest(paths, children[i], point, testFn, pruneFn)){
-
-      }
+  _hitTest(point){
+    this.watchs.forEach((ref, target)=>{
+      this._hitTestUppper(target, point);
+    })
+    this.watchs.forEach((ref, target)=>{
+      if(this.hitTestCaches.get(target) != true) return;
+      this._hitTestLower(target, point);
+    })
+    this.hitTestCaches.clear();
+  }
+  _hitTestUppper(target, point){
+    if(!target) return;
+    let result = this.hitTestCaches.get(target);
+    if(result != undefined){
+      return result;
+    }
+    let prune = this.tester.pruneFn(target, point);
+    if(!prune){
+      result = this.tester.testFn(target, point);
+    }
+    else{
+      result = false;
+    }
+    this.hitTestCaches.set(target, result);
+    let parentResult = this._hitTestUppper(target.parent, point);
+    if(parentResult != undefined){
+      this.hitTestCaches.set(target, parentResult);
     }
   }
-  hitTest(currentTarget, point, testFn=this.hitTestFn, pruneFn=this.hitPruneFn){
+  _hitTestLower(target, point){
+    let ref = this.watchs.get(target);
+    let deep = 0;
+    let test = (target, point)=>{
+      let children = Array.from(target.children);
+      let length = children.length;
+      for(let i=length-1; i>=0; i--){
+        let result = this.hitTestCaches.get(children[i]);
+        if(result == undefined){
+          let prune = this.tester.pruneFn(children[i], point);
+          if(!prune){
+            result = this.tester.testFn(children[i], point);
+          }
+          else{
+            result = false;
+          }
+        }
+        this.hitTestCaches.set(children[i], result);
+        if(result){
+          return children[i];
+        }
+      }
+      return;
+    }
+    let next = true;
+    while((deep++) < ref.maxDeep && next){
+      next = test(target, point);
+    }
+  }
+  hitTest(currentTarget, point, testFn, pruneFn){
     if(pruneFn(currentTarget, point)) return;
     let children = Array.from(currentTarget.children);
     let length = children.length;
@@ -75,7 +137,35 @@ class InputEventBoundary extends EventBoundary{
       }
     }
   }
-  
+  hitPaths(filter=null, paths=[], testFn=this.hitTestFn, pruneFn=this.hitPruneFn){
+
+  } 
+  hitTestFnBounds(target, point){
+    if(target.hitArea){
+      return true;
+    }
+    let bound = target.getBounds();
+    let rect = new Rectangle(bound.x, bound.y, bound.width, bound.height);
+    return rect.contains(point.x, point.y);
+  }
+  hitTestSimple(target, point, testFn=this.hitTestFnBounds, pruneFn=this.hitPruneFn){
+    if(!target) return true;
+    let result = false;
+    let prune = pruneFn(target, point);
+    if(!prune){
+      result = testFn(target, point);
+    }
+    else{
+      result = false;
+    }
+    if(!result){
+      return false;
+    }
+    let parentResult = this.hitTestSimple(target.parent, point, testFn, pruneFn);
+    if(parentResult != undefined){
+      return parentResult;
+    }
+  }
 }
 
 //可能不会使用pixijs原生交互, 一是在多全屏layer情况下的触发问题, 二是使交互判定尽量一致, 如键盘/鼠标/手柄等
@@ -84,7 +174,8 @@ class Input {
     let mapper = await Assets.load("../core/input.yaml");
     const pf = { passive: false };
 
-    this.bound = new EventBoundary(app.stage);
+    this.bound = new InputEventBoundary(app.stage);
+    this.bound.init(app.stage);
     this.itemAbles = new Set();
     
     
@@ -99,6 +190,13 @@ class Input {
     this._mapper = mapper;
     this._repeatInterval = 100;
   }
+
+  static addHitWatch(target, maxDeep=0, testFn=null){
+    this.bound.addHitWatch(target, maxDeep, testFn);
+  }
+  static reduceHitWatch(target){
+    this.bound.reduceHitWatch(target);
+  } 
 
   static clear(blur=false) {
     this._hitTestCaches = new Map();
@@ -333,12 +431,13 @@ class Input {
   }
 
   
-  static hitTest(e) { 
+  static hitTest(e, pointer, testFn, pruneFn) { 
     if(this._hitTestCaches.has(e)){ //一帧之内查询多次的处理
       return this._hitTestCaches.get(e);
     }
-    // let rect = e.getBounds();
-    let result = this.hitTestBase(e);
+    const { x, y } = this._pointer;
+    pointer = pointer || { x, y };
+    let result = this.bound.hitTestSimple(e, pointer, testFn, pruneFn);
     this._hitTestCaches.set(e, result);
     return result;
   }

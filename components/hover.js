@@ -1,5 +1,5 @@
 import { Component } from "../core/Entity";
-import { Input, STATIC } from "../core/input";
+import { Input, STATIC } from "../core/interaction";
 import { ItemAble } from "./itemable";
 
 

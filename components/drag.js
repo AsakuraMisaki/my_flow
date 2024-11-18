@@ -2,7 +2,7 @@ import { Assets, Matrix, Rectangle, RenderTexture, Sprite } from "pixi.js";
 import { Component } from "../core/Entity";
 import { Editor, app, editor, renderer, stage } from "../core/editor";
 import { snap } from "../core/camera";
-import { STATIC, Input, InputEmitter } from "../core/input";
+import { STATIC, Input, InputEmitter } from "../core/interaction";
 
 
 
