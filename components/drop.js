@@ -1,7 +1,7 @@
-import { Component } from "../core/Entity";
-import { Input, STATIC } from "../core/interaction";
-import { Drag } from "./drag";
-import { ItemAble } from "./itemable";
+import { Component } from "../core/Entity.js";
+import { Input, STATIC } from "../core/interaction.js";
+import { Drag } from "./drag.js";
+import { ItemAble } from "./itemable.js";
 
 
 class Drop extends ItemAble{

@@ -1,4 +1,4 @@
-import ev from "./ev";
+import ev from "./ev.js";
 
 /**
  * @abstract

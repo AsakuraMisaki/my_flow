@@ -1,7 +1,7 @@
 
 import { Assets, EventBoundary, Loader, Point, Rectangle, Resolver, extensions } from "pixi.js";
-import { EV } from "./ev";
-import { app } from "./editor";
+import { EV } from "./ev.js";
+// import { app } from "./editor.js";
 
 const STATIC = { MOUSE0: { key:"m0" }, MOUSE1: {key: "m1"}, MOUSE2: { key: "m2"}  };
 for(let key in STATIC){

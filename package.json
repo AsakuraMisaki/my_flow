@@ -2,12 +2,14 @@
   "name": "my_flow",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
+    "electron": "electron ./",
     "dev": "vite",
     "server": "node ./server/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "type": "module",
   "author": "",
   "license": "ISC",
   "dependencies": {
@@ -16,5 +18,8 @@
     "pixi.js": "^8.5.2",
     "vite": "^5.4.10",
     "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0"
   }
 }

@@ -1,4 +1,4 @@
-import { tryCustomArrayOutput, simpleValue, tryAddBasicInput, tryCustomPropOutput, simpleArray, simpleNumber } from "./main";
+import { tryCustomArrayOutput, simpleValue, tryAddBasicInput, tryCustomPropOutput, simpleArray, simpleNumber } from "./main.js";
 
 
 let ctx = { group:"reflect" };

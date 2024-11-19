@@ -1,8 +1,8 @@
 import { Assets, Matrix, Rectangle, RenderTexture, Sprite } from "pixi.js";
-import { Component } from "../core/Entity";
-import { Editor, app, editor, renderer, stage } from "../core/editor";
-import { snap } from "../core/camera";
-import { STATIC, Input, InputEmitter } from "../core/interaction";
+import { Component } from "../core/Entity.js";
+// import { Editor, app, editor, renderer, stage } from "../core/editor.js";
+import { snap } from "../core/camera.js";
+import { STATIC, Input, InputEmitter } from "../core/interaction.js";
 
 
 

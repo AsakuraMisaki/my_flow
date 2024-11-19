@@ -1,5 +1,5 @@
 import { Rectangle, RenderTexture, Sprite, Texture } from "pixi.js";
-import { app, renderer, stage } from "./editor";
+// import { renderer, stage } from "./editor.js";
 
 async function snap(displayObject, resolution=0.5) {
 

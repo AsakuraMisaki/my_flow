@@ -1,5 +1,5 @@
-import ev from "./ev";
-import GameObject from "./gameObject";
+import ev from "./ev.js";
+import GameObject from "./gameObject.js";
 
 /**
  * @abstract

@@ -1,6 +1,6 @@
-import { Component } from "../core/Entity";
-import { Input, STATIC } from "../core/interaction";
-import { ItemAble } from "./itemable";
+import { Component } from "../core/Entity.js";
+import { Input, STATIC } from "../core/interaction.js";
+import { ItemAble } from "./itemable.js";
 
 
 

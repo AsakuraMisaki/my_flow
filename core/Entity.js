@@ -1,5 +1,5 @@
 import { Container, Sprite, Text, Texture, Transform } from "pixi.js";
-import { EV } from "./ev";
+import { EV } from "./ev.js";
 
 Container.prototype.remove = function(){
   if(!this.parent) return;

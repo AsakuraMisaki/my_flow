@@ -1,4 +1,4 @@
-import { Component } from "../core/Entity";
+import { Component } from "../core/Entity.js";
 
 class Layout extends Component{
   constructor(){
@@ -62,7 +62,7 @@ class Layout extends Component{
 }
 
 class Grid extends Layout{
-  constructor(col, margin_x, margin_y){
+  constructor(col=1, margin_x=0, margin_y=0){
     super();
     this.col = col;
     this.margin_x = margin_x;

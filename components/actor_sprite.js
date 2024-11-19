@@ -1,5 +1,5 @@
 import { Sprite } from "pixi.js";
-import Component from "../core/component";
+import Component from "../core/component.js";
 
 class ActorSprite extends Component{
   constructor(){

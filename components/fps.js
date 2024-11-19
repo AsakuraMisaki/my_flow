@@ -1,13 +1,14 @@
-import { Component } from "../core/Entity";
+import { Component } from "../core/Entity.js";
 
 class FPS extends Component{
-  constructor(){
+  constructor(target){
     super();
+    this._target = target;
   }
 
   onUpdate(delta){
     super.onUpdate(delta);
-    this.E.text = delta.toFixed(2) + "MS";
+    this.E.text = this._target.delta.toFixed(2) + "MS";
   }
 }
 

@@ -1,4 +1,4 @@
-import { Component } from "../core/Entity";
+import { Component } from "../core/Entity.js";
 
 class Dynamic extends Component{
   constructor(){

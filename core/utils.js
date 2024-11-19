@@ -1,6 +1,6 @@
-import { FPS } from "../components/fps";
-import { Grid } from "../components/layout";
-import { ContainerEntity, TextEntity } from "./Entity";
+import { FPS } from "../components/fps.js";
+import { Grid } from "../components/layout.js";
+import { ContainerEntity, TextEntity } from "./Entity.js";
 
 class UPromise{
   static new(){
@@ -17,8 +17,9 @@ class UPromise{
 }
 
 class ScreenPrinter extends ContainerEntity{
-  constructor() {
+  constructor(target) {
     super();
+    this._target = target;
   }
 
   onReady(){
@@ -26,7 +27,7 @@ class ScreenPrinter extends ContainerEntity{
     this._accessContainer = new ContainerEntity();
     this._accessContainer.addComponent("grid", new Grid(1, 0, 20));
     this.mainText = new TextEntity();
-    this.mainText.addComponent("fps", new FPS());
+    this.mainText.addComponent("fps", new FPS(this._target));
     this._accessContainer.addChild(this.mainText);
     this.addChild(this._accessContainer);
   }

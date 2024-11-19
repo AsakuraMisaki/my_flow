@@ -1,4 +1,4 @@
-import { tryAddBasicInput, tryCustomPropOutput, simpleArray, simpleNumber, simpleValue } from "./main";
+import { tryAddBasicInput, tryCustomPropOutput, simpleArray, simpleNumber, simpleValue } from "./main.js";
 
 let ctx = { group:"feature" };
 let ex = { ctx };

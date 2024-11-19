@@ -1,4 +1,4 @@
-import { socket, tryAddBasicInput, tryCustomPropOutput, simpleArray, simpleNumber, tryCustomArrayOutput, simpleValue } from "./main";
+import { socket, tryAddBasicInput, tryCustomPropOutput, simpleArray, simpleNumber, tryCustomArrayOutput, simpleValue } from "./main.js";
 
 
 let ctx = { group:"pixijs" };

@@ -1,5 +1,5 @@
 import { Container } from "pixi.js";
-import Component from "../core/component";
+import Component from "../core/component.js";
 
 class ActorContainer extends Component{
   constructor(parent){

@@ -1,4 +1,4 @@
-import { EV } from "./ev";
+import { EV } from "./ev.js";
 
 class Store extends EV{
   constructor(any){

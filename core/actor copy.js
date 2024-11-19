@@ -1,5 +1,5 @@
-import BP from "./bp";
-import ev from "./ev";
+import BP from "./bp.js";
+import ev from "./ev.js";
 
 class Actor extends BP{
   constructor() {
