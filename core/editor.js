@@ -137,7 +137,7 @@ async function ready() {
 }
 
 window.onload = function(){
-  // alert("?");
+  console.warn("?")
   ready();
 }
 
