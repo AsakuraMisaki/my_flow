@@ -5,9 +5,14 @@ const {app, BrowserWindow} = require("electron");
 const createWindow = () => {
   const win = new BrowserWindow({
     width: 800,
-    height: 600
+    height: 980,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+    }
   })
   win.loadURL("http://localhost:5173/");
+  
   win.webContents.openDevTools({ mode: 'detach' });
 }
 

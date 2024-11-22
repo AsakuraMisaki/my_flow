@@ -13,10 +13,23 @@
       alert("?");
     }
   </script> -->
-  <script type="module" src="./core/editor.js"></script>
+  <!-- <script type="module" src="./core/editor.js"></script> -->
+  <script type="module" src="./workflow/blocky.js"></script>
 </head>
 
 <body>
+  <xml
+      xmlns="https://developers.google.com/blockly/xml"
+      id="toolbox-categories"
+      style="display: none">
+      <toolboxlabel name="Custom Toolbox" colour="darkslategrey"></toolboxlabel>
+      <category name="Basic">
+        <block type="math_number"></block>
+      </category>
+      <category name="Queue">
+        <block type="string_length"></block>
+      </category>
+    </xml>
   <!-- <canvas id='editor' style="margin: 0; padding: 0;"></canvas> -->
 </body>
   
