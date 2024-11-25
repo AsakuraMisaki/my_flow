@@ -14,10 +14,11 @@
     }
   </script> -->
   <!-- <script type="module" src="./core/editor.js"></script> -->
-  <script type="module" src="./workflow/block.js"></script>
+  <script type="module" src="./workflow/queueLite.js"></script>
 </head>
 
 <body>
+  <!-- <a href="./temp/index.html">aa</a> -->
   <xml
       xmlns="https://developers.google.com/blockly/xml"
       id="toolbox-categories"
@@ -30,11 +31,8 @@
         <block type="text"></block>
         <block type="lists_create_with"></block>
       </category>
-      <category name="Queue">
-        <block type="Queue_make"></block>
-        <block type="Queue_relation"></block>
-        <block type="Queue_run"></block>
-        <block type="Queue_typeReturn"></block>
+      <category name="Queue" id="Queue">
+        
       </category>
   </xml>
   <!-- <canvas id='editor' style="margin: 0; padding: 0;"></canvas> -->

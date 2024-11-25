@@ -1,6 +1,12 @@
 
 
-const {app, BrowserWindow} = require("electron");
+const {app, BrowserWindow, ipcMain} = require("electron");
+const fs = require("node:fs");
+const path = require("node:path");
+
+// 获取用户数据目录
+// const rPath = app.getPath('./');
+// const filePath = path.join("./", 'queue.json');
 
 const createWindow = () => {
   const win = new BrowserWindow({
@@ -15,6 +21,18 @@ const createWindow = () => {
   
   win.webContents.openDevTools({ mode: 'detach' });
 }
+
+ipcMain.on("save-file", (event, filePath, data)=>{
+  fs.writeFile(filePath, data, (err) => {
+    if (err) {
+        console.error('Error writing file:', err);
+        event.reply('save-file-response', { success: false, error: err.message });
+    } else {
+        event.reply('save-file-response', { success: true });
+    }
+  });
+})
+
 
 app.whenReady().then(() => {
   createWindow()

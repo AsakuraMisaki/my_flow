@@ -54,7 +54,7 @@ class ToolboxBlockDescription{
 }
 
 // class statement [only for] code auto-complete
-class Queue_make extends Blockly.Block{ 
+class Queue_inter extends Blockly.Block{ 
   block(){ //Blockly.Blocks...init
     this.appendValueInput("QueueInfo")
         .setCheck("QueueInfo")
@@ -62,13 +62,36 @@ class Queue_make extends Blockly.Block{
         .appendField(new Blockly.FieldDropdown([["销毁", "destroy"], ["生命周期", "life"]]), "Qname");
     this.setNextStatement(true);
     this.setColour(255);
-    this.setCommentText("注释");
+    this.setCommentText("生命周期序列在序列开始时自动构建运行, 销毁序列在销毁指令后运行[并停止其他所有序列]");
   }
   forBlock(block=this, generator = PlainGenerator){ //generator.forBlock
+    let QueueInfo = block.getFieldValue("QueueInfo");
     let value = block.getFieldValue("Qname");
-    // console.log(value);
-    // // let next = 
-    // let next = block.getNextBlock()
+    let methodLists = block.getNextBlock();
+    return value;
+  }
+  //toolbox-xml-category-auto-detect
+  static toolbox(){
+    let desc = ToolboxBlockDescription();
+    desc.category = "Queue";
+  }
+}
+
+class Queue_custom extends Blockly.Block{
+  block(){ //Blockly.Blocks...init
+    this.appendValueInput("QueueInfo")
+        .setCheck("QueueInfo")
+        .appendField("自定义序列")
+        .appendField(new Blockly.FieldTextInput("序列名"), "Qname");
+    this.setNextStatement(true);
+    this.setColour(254);
+    this.setCommentText("自定义序列");
+  }
+  forBlock(block=this, generator = PlainGenerator){ //generator.forBlock
+    let value = block.getFieldValue("Amount");
+    console.log(value);
+    // let next = 
+    let next = block.getNextBlock()
     return value;
   }
   //toolbox-xml-category-auto-detect
@@ -93,7 +116,7 @@ class Queue_relation extends Blockly.Block{
     this.appendDummyInput();
     this.setOutput(true, "QueueInfo");
     this.setColour(1);
-    this.setTooltip('Returns number of letters in the provided text.');
+    this.setCommentText('父级:父级序列被关闭时本序列将同时关闭，自动清除:本序列开启时将自动清除目标序列, 锁定:本序列开启时目标序列将无法开启');
   }
   forBlock(block=this, generator = PlainGenerator){ //generator.forBlock
     let value = block.getFieldValue("Amount");
@@ -112,7 +135,6 @@ class Queue_relation extends Blockly.Block{
 class Queue_name extends Blockly.Block{ 
   block(){ //Blockly.Blocks...init
     this.appendValueInput("Cache")
-
         .appendField(new Blockly.FieldDropdown([["生命周期", "life"]]), 'qName')
     this.setOutput(true, "Qname")
   }
@@ -129,9 +151,10 @@ class Queue_name extends Blockly.Block{
 class Queue_typeReturn extends Blockly.Block{ 
   block(){ //Blockly.Blocks...init
     this.appendEndRowInput("Cache")
-        .appendField('缓存')
-        .appendField(new Blockly.FieldTextInput("id"), 'cacheName')
+        .appendField('缓存到')
+        .appendField(new Blockly.FieldTextInput(""), 'cacheName')
     this.setOutput(true, "String")
+    this.setColour(360)
   }
   forBlock(block=this, generator = PlainGenerator){ //generator.forBlock
     return 0;
@@ -143,20 +166,54 @@ class Queue_typeReturn extends Blockly.Block{
   }
 }
 
-class Queue_param extends Blockly.Block{
+class Queue_typeCondition extends Blockly.Block{ 
+  block(){ //Blockly.Blocks...init
+    this.appendValueInput("Condition")
+        .setCheck("ContextString")
+        .appendField('条件')
+    this.setOutput(true, "Context")
+    this.setColour(360)
+  }
+  forBlock(block=this, generator = PlainGenerator){ //generator.forBlock
+    return 0;
+  }
+  //toolbox-xml-category-auto-detect
+  static toolbox(){
+    let desc = ToolboxBlockDescription();
+    desc.category = "Queue";
+  }
+}
+
+class Queue_typeMax extends Blockly.Block{ 
+  block(){ //Blockly.Blocks...init
+    this.appendValueInput("Condition")
+        .setCheck("ContextString")
+        .appendField("最大执行次数")
+    this.setOutput(true, "Context")
+    this.setColour(360)
+  }
+  forBlock(block=this, generator = PlainGenerator){ //generator.forBlock
+    return 0;
+  }
+  //toolbox-xml-category-auto-detect
+  static toolbox(){
+    let desc = ToolboxBlockDescription();
+    desc.category = "Queue";
+  }
+}
+
+class Queue_method extends Blockly.Block{
   block(){ //Blockly.Blocks...init
     this.appendValueInput('VALUE')
-        .setCheck('String')
+        .setCheck(["Context"])
         .appendField(new Blockly.FieldCheckbox(true), 'Amount')
         .appendField(new Blockly.FieldDropdown([
           ['方法', 'Method'],
         ]), 'Method')
-    // this.setOutput(true, 'typeReturn');
-    this.setCommentText("注释");
+    this.setCommentText("已提供的方法");
     this.setPreviousStatement(true);
     this.setNextStatement(true);
     this.setColour(160);
-    this.setTooltip('Returns number of letters in the provided text.');
   }
   forBlock(block=this, generator = PlainGenerator){ //generator.forBlock
     let value = block.getFieldValue("Amount");
@@ -172,18 +229,16 @@ class Queue_param extends Blockly.Block{
   }
 }
 
-class Queue_run extends Blockly.Block{ 
+class Queue_param extends Blockly.Block{ 
   block(){ //Blockly.Blocks...init
     
     this.appendValueInput('VALUE')
         .setCheck(["Param"])
-        .appendField(new Blockly.FieldDropdown([["值", "Value"], ["值函数", "ValueFunction"], ["函数", "Function"], ["切分", "Array"]]), "ParamType")
+        .appendField(new Blockly.FieldDropdown([["值", "Value"], ["值(手动)", "ValueFunction"], ["函数", "Function"], ["切分", "Array"]]), "ParamType")
         .appendField(new Blockly.FieldDropdown([["参数", "Param"]]), "Param")
-    // this.appendDummyInput()
-    this.setOutput(true, 'String');
+    this.setOutput(true, "Context");
     this.setColour(20);
     this.setCommentText("注释");
-    this.setTooltip('Returns number of letters in the provided text.');
   }
   forBlock(block=this, generator = PlainGenerator){ //generator.forBlock
     let value = block.getFieldValue("Amount");
@@ -199,41 +254,16 @@ class Queue_run extends Blockly.Block{
   }
 }
 
-class Queue_param_value extends Blockly.Block{ 
-  
-  block(){ //Blockly.Blocks...init
-    
-
-    // 添加一个插槽，允许放置其他块
-    this.appendValueInput("INPUT_SLOT")
-    .setCheck("ParamX") // 允许放置任何类型的块
-    this.setCommentText("注释");
-    this.setOutput(true, "Param");
-  } 
-  forBlock(block=this, generator = PlainGenerator){ //generator.forBlock
-    let value = block.getFieldValue("Amount");
-    console.log(value);
-    // let next = 
-    let next = block.getNextBlock()
-    return value;
-  }
-  //toolbox-xml-category-auto-detect
-  static toolbox(){
-    let desc = ToolboxBlockDescription();
-    desc.category = "Queue";
-  }
-}
-
-class Queue_local extends Blockly.Block{ 
+class Queue_value extends Blockly.Block{ 
   
   block(){ //Blockly.Blocks...init
     // 添加一个插槽，允许放置其他块
-    this.appendValueInput("INPUT_SLOT")
+    this.appendValueInput("Value")
     .appendField(
-      new FieldMultilineInput('direct Value'),
+      new FieldMultilineInput("规范字符串"),
       'value',
     )
-    this.setOutput(true, "Param");
+    this.setOutput(true, "ContextString");
   } 
   forBlock(block=this, generator = PlainGenerator){ //generator.forBlock
     let value = block.getFieldValue("Amount");
@@ -249,8 +279,64 @@ class Queue_local extends Blockly.Block{
   }
 }
 
+class Queue_group extends Blockly.Block{ 
+  
+  block(){
+    this.appendValueInput("Value").setCheck(["Context"]).appendField("组")
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+  } 
+  forBlock(block=this, generator = PlainGenerator){ //generator.forBlock
+    
+  }
+  //toolbox-xml-category-auto-detect
+  static toolbox(){
+    let desc = ToolboxBlockDescription();
+    desc.category = "Queue";
+  }
+}
 
+class Queue_groupend extends Blockly.Block{ 
+  
+  block(){ //Blockly.Blocks...init
+    this.appendEndRowInput().appendField('组结束')
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+  } 
+  forBlock(block=this, generator = PlainGenerator){ //generator.forBlock
+    
+  }
+  //toolbox-xml-category-auto-detect
+  static toolbox(){
+    let desc = ToolboxBlockDescription();
+    desc.category = "Queue";
+  }
+}
 
+class Queue_public extends Blockly.Block{ 
+  
+  block(){ //Blockly.Blocks...init
+    this.appendValueInput("Context")
+        .appendField("公共序列")
+        .appendField(new Blockly.FieldDropdown([["序列", "序列"]]), "Queue")
+    this.setPreviousStatement(true);
+    this.setNextStatement(true);
+  } 
+  forBlock(block=this, generator = PlainGenerator){ //generator.forBlock
+    
+  }
+  //toolbox-xml-category-auto-detect
+  static toolbox(){
+    let desc = ToolboxBlockDescription();
+    desc.category = "Queue";
+  }
+}
+
+let list = [
+  Queue_groupend, Queue_group, Queue_value, Queue_param, 
+  Queue_method, Queue_typeReturn, Queue_name, Queue_relation,
+  Queue_custom, Queue_inter, Queue_typeMax, Queue_typeCondition, Queue_public 
+]
 
 
 
@@ -262,44 +348,19 @@ PlainGenerator.scrub_ = function(block, code, thisOnly) {
   }
   return code;
 };
-Blockly.Blocks.Queue_relation = {
-  init: Queue_relation.prototype.block,
-}
-PlainGenerator.forBlock.Queue_relation = Queue_relation.prototype.forBlock.bind(Queue_relation);
-Blockly.Blocks.Queue_run = {
-  init: Queue_run.prototype.block,
-}
-PlainGenerator.forBlock.Queue_run = Queue_run.prototype.forBlock.bind(Queue_run);
-Blockly.Blocks.Queue_make = {
-  init: Queue_make.prototype.block,
-}
-PlainGenerator.forBlock.Queue_make = Queue_make.prototype.forBlock.bind(Queue_make);
 
-Blockly.Blocks.Queue_typeReturn = {
-  init: Queue_typeReturn.prototype.block,
-}
-PlainGenerator.forBlock.Queue_typeReturn = Queue_typeReturn.prototype.forBlock.bind(Queue_typeReturn);
 
-Blockly.Blocks.Queue_param = {
-  init: Queue_param.prototype.block,
-}
-PlainGenerator.forBlock.Queue_param = Queue_param.prototype.forBlock.bind(Queue_param);
-
-Blockly.Blocks.Queue_param_value = {
-  init: Queue_param_value.prototype.block,
-}
-PlainGenerator.forBlock.Queue_param_value = Queue_param_value.prototype.forBlock.bind(Queue_param_value);
-
-Blockly.Blocks.Queue_local = {
-  init: Queue_local.prototype.block,
-}
-PlainGenerator.forBlock.Queue_local = Queue_local.prototype.forBlock.bind(Queue_local);
-
-Blockly.Blocks.Queue_name = {
-  init: Queue_name.prototype.block,
-}
-PlainGenerator.forBlock.Queue_name = Queue_name.prototype.forBlock.bind(Queue_name);
-
+let toolbox = document.getElementById("Queue");
+list.forEach((q)=>{
+  let name = q.name;
+  Blockly.Blocks[name] = {
+    init: q.prototype.block,
+  }
+  PlainGenerator.forBlock[name] = q.prototype.forBlock.bind(q);
+  let block = document.createElement("block");
+  block.setAttribute("type", name);
+  toolbox.append(block);
+})
 // class targetToolBox extends Blockly.Toolbox{
 //   constructor(categoryDef, toolbox, opt_parent){
 //     super(categoryDef, toolbox, opt_parent);
