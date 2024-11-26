@@ -1,0 +1,9 @@
+{
+  "plugins": ["project/jsonOutputPlugin.js"],
+  "source": {
+    "include": ["project"]
+  },
+  "opts": {
+    "destination": "./out"
+  }
+}
