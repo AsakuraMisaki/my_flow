@@ -36,12 +36,12 @@ class Editor{
       // console.log(e, e.target);
       this.lastSvgTarget = this.findSvgTarget(e.target);
       requestAnimationFrame(this.update.bind(this));
+      this.lastSvgTarget = null;
     })
     window.addEventListener("resize", ()=>{
       this.adapt();
     })
     this.consoleDiv = document.getElementById("console");
-    
   }
   findSvgTarget(etarget){
     if(!etarget) return;
@@ -478,7 +478,6 @@ class Queue_valueLocal extends Blockly.Block{
 class Queue_valueMeta extends Blockly.Block{ 
   
   block(){ //Blockly.Blocks...init
-    // 添加一个插槽，允许放置其他块
     this.appendValueInput("Context")
         .appendField(new Blockly.FieldDropdown(()=>{
           let base = [
