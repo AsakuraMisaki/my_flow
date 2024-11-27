@@ -3,7 +3,7 @@
 const {app, BrowserWindow, ipcMain} = require("electron");
 const fs = require("node:fs");
 const path = require("node:path");
-
+// const server = require("./server");
 // 获取用户数据目录
 // const rPath = app.getPath('./');
 // const filePath = path.join("./", 'queue.json');
@@ -32,6 +32,7 @@ ipcMain.on("save-file", (event, filePath, data)=>{
     }
   });
 })
+
 
 
 app.whenReady().then(() => {
