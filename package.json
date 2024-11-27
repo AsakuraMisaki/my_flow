@@ -28,6 +28,19 @@
   "devDependencies": {
     "blocky": "^0.0.1",
     "electron": "^33.2.0",
+    "electron-builder": "^25.1.8",
     "vite-plugin-electron-renderer": "^0.14.6"
+  },
+  "build": {
+    "appId": "com.by.queue",
+    "win": {
+      "target": "nsis"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
   }
 }

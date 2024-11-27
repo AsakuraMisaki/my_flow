@@ -179,7 +179,8 @@ class Editor{
     this.caches = this.caches || new Map();
     this.currentCacheKey = key;
     if(this.caches.get(key)){
-      Blockly.serialization.workspaces.load(key, this.workspace);
+      Blockly.serialization.workspaces.load(this.caches.get(key), this.workspace);
+      return;
     }
     let builder = new QueueTextOld(this.workspace, this);
     builder.build(this.workspace, meta);
@@ -188,8 +189,8 @@ class Editor{
     builder.build(this.workspace);
   }
   beforeBuild(){
-    Blockly.serialization.workspaces.save(this.workspace, this.currentCacheKey);
-    this.caches ? this.caches.set(this.currentCacheKey, true) : null;
+    let data = Blockly.serialization.workspaces.save(this.workspace);
+    this.caches ? this.caches.set(this.currentCacheKey, data) : null;
   }
   
   initToolBox(){
