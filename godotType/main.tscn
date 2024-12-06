@@ -1,0 +1,20 @@
+[gd_scene format=2]
+
+[node name="Node2D" type="Node2D"]
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+margin_right = 1022.0
+margin_bottom = 598.0
+
+[node name="ItemList" type="ItemList" parent="HBoxContainer"]
+margin_right = 163.0
+margin_bottom = 598.0
+size_flags_horizontal = 3
+items = [ "target", null, false ]
+
+[node name="Panel" type="Panel" parent="HBoxContainer"]
+margin_left = 167.0
+margin_right = 1022.0
+margin_bottom = 598.0
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 5.22

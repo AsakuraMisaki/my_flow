@@ -3,14 +3,14 @@
 const {app, BrowserWindow, ipcMain} = require("electron");
 const fs = require("node:fs");
 const path = require("node:path");
-// const server = require("./server");
+// const server = require("./server/server.js");
 // 获取用户数据目录
 // const rPath = app.getPath('./');
 // const filePath = path.join("./", 'queue.json');
 
 const createWindow = () => {
   const win = new BrowserWindow({
-    width: 800,
+    width: 1600,
     height: 980,
     webPreferences: {
       nodeIntegration: true,
@@ -32,8 +32,6 @@ ipcMain.on("save-file", (event, filePath, data)=>{
     }
   });
 })
-
-
 
 app.whenReady().then(() => {
   createWindow()

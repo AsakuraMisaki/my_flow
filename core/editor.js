@@ -8,6 +8,7 @@ import { YAML } from "./yaml.js";
 import { Hover } from "../components/hover.js";
 import { Grid, Layout } from "../components/layout.js";
 import { ScreenPrinter } from "./utils.js";
+import { list } from "../entities/queue/list.js";
 
 
 class Editor extends ContainerEntity {
@@ -47,81 +48,29 @@ class Editor extends ContainerEntity {
 
   async onReady() {
     super.onReady();
-    await Input.setup();
-    let mask = new Graphics();
-    mask.rect(0, 0, 900, 500);
-    mask.fill(0xffffff, 1);
-    // app.stage.addChild(mask);
-
-    let ui = this.addLayer("ui", { zIndex: 8 });
-    let texture = await Assets.load("../res/icons.png");
-    let baseGrid = ui.addComponent("grid", new Grid(1, 0, 0));
-    let testContainer = new ContainerEntity();
-    let grid = testContainer.addComponent("grid", new Grid(20, 10, 10));
-    let hover = testContainer.addComponent("hover", new Hover().itemAble().itemOnly());
-
-    for (let i = 0; i < 2000; i++) {
-      let tex = new Texture(texture);
-
-      let container = new Container();
-      let t = new SpriteEntity(tex);
-      t.anchor.x = 0.5;
-      let tt = new TextEntity("aaaaaaa");
-      tt.x += 200;
-      t.addChild(tt);
-
-      testContainer.addChild(t);
-    }
-    grid.refresh();
-
-
-    this.test1 = new ScreenPrinter(this);
-
-    ui.addChild(this.test1, testContainer);
-    // testContainer._timeScale = 0;
-    grid.on("transformend", () => {
-      baseGrid.refresh();
-    })
-    grid.on("transformend", () => {
-      hover.on("hoverin", (current) => {
-
-        // console.log(current);
-        // if(current == testContainer) return;
-        current.alpha = 0.5;
-      })
-      hover.on("hoverout", (old) => {
-        // if(old == testContainer) return;
-        old.alpha = 1;
-      })
-      hover.on("hover", (current) => {
-        // console.log(current == testContainer);
-      })
-    })
+    await Input.setup(app);
+    let qList = new list();
+    this.addChild(qList);
   }
 }
+
+
 
 
 async function ready() {
   const app = new Application();
 
   // Initialize the application
-  await app.init({ background: '#1099bb', resizeTo: globalThis });
+  let targetCanvas = document.getElementById("workspace");
+  await app.init({ background: '#1099bb', canvas:targetCanvas, resizeTo:targetCanvas });
 
   // Append the application canvas to the document body
-  document.body.appendChild(app.canvas);
+  // document.body.appendChild(app.canvas);
 
   const renderer = app.renderer;
   const stage = app.stage;
-  // app.stage.eventMode = "static";
-  // app.stage.interactive = true;
-  // app.stage.hitArea = app.screen;
 
-
-
-
-  // app.stage.on("pointerdown", (e)=>{
-  //   console.warn(e);
-  // })
+  globalThis.app = app;
 
   const update = function (ticker) {
     stage.children.forEach((c) => {
@@ -137,7 +86,7 @@ async function ready() {
 }
 
 window.onload = function(){
-  console.warn("?")
+  console.warn("?");
   ready();
 }
 

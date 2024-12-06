@@ -2,14 +2,15 @@ import { Rectangle, RenderTexture, Sprite, Texture } from "pixi.js";
 // import { renderer, stage } from "./editor.js";
 
 async function snap(displayObject, resolution=0.5) {
-
+  let renderer = app.renderer;
+  let stage = app.stage;
   let texture = await renderer.extract.texture({
     target: stage,
     resolution
   });
   const {x, y, width, height} = displayObject.getBounds();
   
-  texture.frame = new Rectangle(0, 0, 20, 20);
+  texture.cut(new Rectangle(x, y, width, height), true);
   let sprite = new Sprite(texture);
   
   // texture.update();

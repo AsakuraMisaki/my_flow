@@ -70,7 +70,7 @@ class Grid extends Layout{
   }
 
   onRefresh(children){
-    let col = this.col;
+    let col = (typeof(this.col) == "function" ? this.col() : this.col);
     let _col = -1;
     let y = 0;
     let ty = 0;

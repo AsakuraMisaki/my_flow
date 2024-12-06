@@ -29,7 +29,7 @@ class Hover extends ItemAble{
   }
 
 }
-Hover._global = null;
+
 
 export { Hover };
 

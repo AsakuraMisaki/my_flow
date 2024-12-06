@@ -4,7 +4,7 @@ import { FieldMultilineInput } from '@blockly/field-multilineinput';
 import List from "list.js";
 import * as FilePond from 'filepond';
 
-import { ipcMain, ipcRenderer } from "electron";
+// import { ipcMain, ipcRenderer } from "electron";
 
 const PlainGenerator = new Blockly.Generator("Plain");
 
@@ -127,8 +127,13 @@ class Editor{
   }
   Queue_method_autoComplte(data){
     if(!data.meta) return;
-    let result = { name:data.name, desc:data.description };
-    this.autoComplete.userContext.set(result, data);
+    let name = data.name;
+    let result = { name, desc:data.description };
+    if(!this.autoComplete.userContext.has(name)){
+      this.autoComplete.userContext.set(name, new Set());
+    }
+    let ctxs = this.autoComplete.userContext.get(name);
+    ctxs.add(data);
     return result;
   }
   setCompleteContext(gen=this.Queue_method_autoComplte, dataset=this.types){
@@ -176,10 +181,10 @@ class Editor{
     // console.log(allBlocks);
   }
   buildBlocklyWithTextOld(meta, key){
-    this.caches = this.caches || new Map();
+    this.caches = this.caches || { };
     this.currentCacheKey = key;
-    if(this.caches.get(key)){
-      Blockly.serialization.workspaces.load(this.caches.get(key), this.workspace);
+    if(this.caches[key]){
+      Blockly.serialization.workspaces.load(this.caches[key], this.workspace);
       return;
     }
     let builder = new QueueTextOld(this.workspace, this);
@@ -190,15 +195,15 @@ class Editor{
   }
   beforeBuild(){
     let data = Blockly.serialization.workspaces.save(this.workspace);
-    this.caches ? this.caches.set(this.currentCacheKey, data) : null;
+    this.caches ? (this.caches[this.currentCacheKey] = data) : null;
   }
   
   initToolBox(){
     let list = [
       Queue_groupend, Queue_group, Queue_value, Queue_valueOp, Queue_valueInter, Queue_valueMeta, 
-      Queue_param, Queue_valueLocal, Queue_addMeta, Queue_meta, 
-      Queue_method, Queue_methodCustom, Queue_typeReturn, Queue_name, Queue_relation,
-      Queue_custom, Queue_inter, Queue_typeMax, Queue_typeCondition, Queue_public 
+      Queue_param, Queue_valueLocal, Queue_addMeta, Queue_meta, Queue_typePack,
+      Queue_method, Queue_typeReturn, Queue_relation, Queue_ref,
+      Queue_custom, Queue_typeMax, Queue_typeCondition, Queue_public, Queue_addPublic 
     ]
     let toolbox = document.getElementById("Queue");
     list.forEach((q)=>{
@@ -258,6 +263,7 @@ class Editor{
     })
   
     this.meta = temp;
+    console.log(this.meta);
   }
 }
 
@@ -277,10 +283,44 @@ class QueueTextOld extends Builder{
 
   buildMethod(methodInfo){
     let blockMethod = this.genMethod(methodInfo.name);
+    let blockParams = [];
+    let params = [];
+    if(methodInfo.name == "preparePIXIfilter"){
+      console.log(methodInfo);
+    }
+    if(blockMethod.ctx && blockMethod.ctx.size == 1){
+      let targetCtx = Array.from(blockMethod.ctx)[0];
+      // if(!targetCtx.params){
+      //   params = [{name:"余参"}];
+      // }
+      // if(!targetCtx.params || ( targetCtx.params && /^\.\.\./i.test(targetCtx.params[0].name ) )){
+      //   params = new Array(methodInfo.args.length).fill(0).map((data, i)=>{
+      //     let a = methodInfo.args[i];
+      //     return a;
+      //   })
+      // }
+      if(targetCtx.params){
+        params = new Array(targetCtx.params.length).fill(0).map((data, i)=>{
+          let a = targetCtx.params[i];
+          return { name:a.name };
+        })
+      }
+    }
+    console.log(params);
+    let blockLast = blockMethod;
     if(methodInfo.args && methodInfo.args.length){
-      let blockParam = this.genParams(methodInfo.args);
-      blockMethod.getInput("Context").connection.connect(blockParam.type.outputConnection);
-      blockMethod.blockParam = blockParam;
+      let blockParam = this.genParams(params, methodInfo.args);
+      if(blockParam){
+        blockMethod.getInput("Context").connection.connect(blockParam.type.outputConnection);
+        blockMethod.blockParam = blockParam;
+        blockLast = blockParam.lastest.value;
+      }
+    }
+    if(methodInfo.cached){
+      let blockCache = this.newBlock(Queue_typeReturn);
+      blockCache.getField("Value").setValue(methodInfo.cached);
+      blockLast.getInput("Context").connection.connect(blockCache.outputConnection);
+      blockMethod.blockCache = blockCache;
     }
     return blockMethod;
   }
@@ -290,12 +330,13 @@ class QueueTextOld extends Builder{
     let count = 0;
     for(let key in dataSet){
       let data0 = dataSet[key];
-      // if(key != "life") continue;
+      // if(key != "keybinding") continue;
       let blockQueue = this.genQueue(key, {});
       count+=100;
       blockQueue.moveBy(count, 0);
       let targetStateMent = blockQueue;
-      data0.forEach((data)=>{
+      data0.forEach((data, i)=>{
+        
         if(data.list && !Array.isArray(data.list)){
           let blockMethod = this.buildMethod(data.list);
           let blockFlag = this.genFlags(data.flags);
@@ -303,9 +344,15 @@ class QueueTextOld extends Builder{
             if(blockMethod.blockParam){
               blockMethod.getInput("Context").connection.connect(blockFlag.type.outputConnection);
               blockFlag.value.getInput("Context").connection.connect(blockMethod.blockParam.type.outputConnection);
+              if(blockMethod.blockCache){
+                blockMethod.blockParam.lastest.value.getInput("Context").connection.connect(blockMethod.blockCache.outputConnection);
+              }
             }
             else{
               blockMethod.getInput("Context").connection.connect(blockFlag.type.outputConnection);
+              if(blockMethod.blockCache){
+                blockFlag.lastest.value.getInput("Context").connection.connect(blockMethod.blockCache.outputConnection);
+              }
             }
           }
           targetStateMent.nextConnection.connect(blockMethod.previousConnection);
@@ -354,16 +401,74 @@ class QueueTextOld extends Builder{
 
   genMethod(name){
     let blockMethod = this.newBlock(Queue_method);
+    let ctx = this.editor.autoComplete.userContext.get(name);
+    console.log(ctx);
     blockMethod.getField("Value").setValue(name);
+    blockMethod.ctx = ctx;
     return blockMethod;
   }
 
-  genParams(args){
+  genParams(params, args){
+    let newArgs = new Array(params).fill({value:""});
+    let fix = Math.max(args.length - params.length, 0);
+    let correctArgs = args.slice(0, params.length) || [];
+    let remainArgs = args.slice(params.length, args.length) || [];
+    if(remainArgs.indexOf("..") >= 0){
+      console.log(correctArgs, remainArgs);
+    } 
+    remainArgs = remainArgs.filter((a)=>(a + "") || (a && !a.list));
+    correctArgs = correctArgs.filter((a)=>(a + "") || (a && !a.list));
+    let last = { type:"按空格切分", a:"" };
+    remainArgs.forEach((a)=>{
+      let va;
+      if(a == null){
+        va = "null";
+      }
+      else{
+        va = (a.a || a);
+      }
+      if(/^\.\./i.test(va)){
+        return;
+      }
+      last.a += va + " ";
+    })
+    
+    correctArgs.push(last);
+    correctArgs = correctArgs.map((a, i)=>{
+      let param = params[i];
+      let pname;
+      if(!param){
+        pname = "余参";
+      }
+      else{
+        pname = param.name;
+      }
+      
+      let value = a;
+      
+      if(typeof(a) == "string"){
+        value = a;
+      }
+      else if(typeof(a.a) == "string"){
+        value = a.a;
+      }
+      let type = "值";
+      if(a.type){
+        type = a.type;
+      }
+      if(a.a && a.Func){
+        type = "函数";
+      }
+      return { pname, value, type };
+    })
+    correctArgs = correctArgs.filter((a)=>a && (a.value + ""));
     let all = [];
-    args.forEach((a)=>{
+    correctArgs.forEach((data)=>{
       let blockValue = this.newBlock(Queue_value);
       let blockParam = this.newBlock(Queue_param);
-      blockValue.getField("Value").setValue(a.a || a);
+      blockParam.getField("Param").setValue(data.pname);
+      blockParam.getField("ParamType").setValue(data.type);
+      blockValue.getField("Value").setValue(data.value);
       blockParam.getInput("Context").connection.connect(blockValue.outputConnection);
       all.push({ type:blockParam, value:blockValue });
     })
@@ -372,6 +477,9 @@ class QueueTextOld extends Builder{
       if(!next) return;
       bs.value.getInput("Context").connection.connect(next.type.outputConnection);
     })
+    if(all[0]){
+      all[0].lastest = all[all.length-1];
+    }
     return all[0];
   }
 
@@ -410,6 +518,9 @@ class QueueTextOld extends Builder{
       if(!next) return;
       current.value.getInput("Context").connection.connect(next.type.outputConnection);
     })
+    if(all[0]){
+      all[0].lastest = all[all.length-1];
+    }
     return all[0];
   }
 
@@ -458,11 +569,10 @@ class Queue_custom extends Blockly.Block{
   block(){ //Blockly.Blocks...init
     this.appendValueInput("Context")
         .setCheck(["QueueInfo", "Comment"])
-        .appendField("自定义序列")
+        .appendField("序列")
         .appendField(new Blockly.FieldTextInput("序列名"), "Qname");
     this.setNextStatement(true);
     this.setColour(254);
-    this.setTooltip("自定义序列");
   }
   forBlock(block=this, generator = PlainGenerator){ //generator.forBlock
     let value = block.getFieldValue("Amount");
@@ -509,14 +619,15 @@ class Queue_relation extends Blockly.Block{
   }
 }
 
-class Queue_name extends Blockly.Block{ 
+class Queue_ref extends Blockly.Block{ 
   block(){ //Blockly.Blocks...init
     this.appendValueInput("Cache")
+        .appendField("序列引用")
         .appendField(new Blockly.FieldDropdown(()=>{
-          let all = [["生命周期", "life"], ["销毁", "destroy"]];
-          // let workspace = 
+          let all = [["life", "life"]];
           return all;
         }), 'qName')
+        
     this.setOutput(true, "Qname")
   }
   forBlock(block=this, generator = PlainGenerator){ //generator.forBlock
@@ -533,8 +644,26 @@ class Queue_typeReturn extends Blockly.Block{
   block(){ //Blockly.Blocks...init
     this.appendEndRowInput("Cache")
         .appendField('缓存到')
-        .appendField(new Blockly.FieldTextInput(""), 'cacheName')
-    this.setOutput(true, "String")
+        .appendField(new Blockly.FieldTextInput(""), 'Value')
+    this.setOutput(true, "Context")
+    this.setColour(360)
+  }
+  forBlock(block=this, generator = PlainGenerator){ //generator.forBlock
+    return 0;
+  }
+  //toolbox-xml-category-auto-detect
+  static toolbox(){
+    let desc = ToolboxBlockDescription();
+    desc.category = "Queue";
+  }
+}
+
+class Queue_typePack extends Blockly.Block{ 
+  block(){ //Blockly.Blocks...init
+    this.appendValueInput("Context")
+        .setCheck(["Context", "QueueInfo"])
+        .appendField('打包而非执行')
+    this.setOutput(true, ["Context", "QueueInfo"])
     this.setColour(360)
   }
   forBlock(block=this, generator = PlainGenerator){ //generator.forBlock
@@ -674,7 +803,7 @@ class Queue_param extends Blockly.Block{
     
     this.appendValueInput('Context')
         .setCheck(["ContextString", "Comment"])
-        .appendField(new Blockly.FieldDropdown([["值", "Value"], ["值(手动)", "ValueFunction"], ["函数", "Function"], ["切分", "Array"]]), "ParamType")
+        .appendField(new Blockly.FieldTextInput("值"), "ParamType")
         .appendField(new Blockly.FieldTextInput("参数"), "Param");
     this.setOutput(true, "Context");
     this.setColour(20);
@@ -699,10 +828,11 @@ class Queue_value extends Blockly.Block{
   block(){ //Blockly.Blocks...init
     // 添加一个插槽，允许放置其他块
     this.appendValueInput("Context")
-    .appendField(
-      new FieldMultilineInput("规范字符串"),
-      "Value",
-    )
+        .setCheck("Context")
+        .appendField(
+          new FieldMultilineInput("规范字符串"),
+          "Value",
+        )
     this.setOutput(true, "ContextString");
   } 
   forBlock(block=this, generator = PlainGenerator){ //generator.forBlock
@@ -746,6 +876,7 @@ class Queue_valueInter extends Blockly.Block{
     desc.category = "Queue";
   }
 }
+
 
 class Queue_valueOp extends Blockly.Block{ 
   
@@ -876,7 +1007,7 @@ class Queue_groupend extends Blockly.Block{
   }
 }
 
-class Queue_public extends Blockly.Block{ 
+class Queue_addPublic extends Blockly.Block{ 
   
   block(){ //Blockly.Blocks...init
     this.appendValueInput("Context")
@@ -886,6 +1017,24 @@ class Queue_public extends Blockly.Block{
           return base;
         }), "Queue")
     this.setPreviousStatement(true);
+    this.setNextStatement(true);
+  } 
+  forBlock(block=this, generator = PlainGenerator){ //generator.forBlock
+    
+  }
+  //toolbox-xml-category-auto-detect
+  static toolbox(){
+    let desc = ToolboxBlockDescription();
+    desc.category = "Queue";
+  }
+}
+
+class Queue_public extends Blockly.Block{ 
+  
+  block(){ //Blockly.Blocks...init
+    this.appendValueInput("Context")
+        .appendField("公共序列定义")
+        .appendField(new Blockly.FieldTextInput("序列名"), "Queue");
     this.setNextStatement(true);
   } 
   forBlock(block=this, generator = PlainGenerator){ //generator.forBlock

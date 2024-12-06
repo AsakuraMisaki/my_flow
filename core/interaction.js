@@ -8,6 +8,7 @@ for(let key in STATIC){
   STATIC[key].parent = STATIC;
 }
 
+let app = null;
 const InputEmitter = new EV();
 class Pointer{
   constructor(){
@@ -170,13 +171,15 @@ class InputEventBoundary extends EventBoundary{
 
 //可能不会使用pixijs原生交互, 一是在多全屏layer情况下的触发问题, 二是使交互判定尽量一致, 如键盘/鼠标/手柄等
 class Input { 
-  static async setup() {
+  static async setup(_app) {
     let mapper = await Assets.load("../core/input.yaml");
     const pf = { passive: false };
-
+    app = _app;
     this.bound = new InputEventBoundary(app.stage);
     this.bound.init(app.stage);
     this.itemAbles = new Set();
+
+    this.interactionSets = new Set();
     
     
     document.addEventListener("keydown", this._onKeyDown.bind(this));
@@ -243,8 +246,8 @@ class Input {
   }
 
   static updatePointer(e) {
-    this._pointer._x = e.clientX - app.screen.x;
-    this._pointer._y = e.clientY - app.screen.y;
+    this._pointer._x = e.clientX - app.canvas.offsetLeft;
+    this._pointer._y = e.clientY - app.canvas.offsetTop;
   }
 
   static _onPointerDown(e) {
@@ -253,6 +256,22 @@ class Input {
     this._onKeyDown({ key, keyCode: 0 });
     InputEmitter.emit("pointerdown", this.pointer);
     console.warn(this.mapper, e);
+  }
+
+  static addInteractionFlags(e, flag){
+    e.interactionFlags = e.interactionFlags || new Set();
+    e.interactionFlags.add(flag);
+  }
+
+  static updateInteractionFlags(stage, flag){
+    let children = stage.children.reverse();
+    for(let i = 0; i<children.length; i++){
+      let e = children[i];
+      if(e.interactionFlags && e.interactionFlags.has(flag)){
+        return e;
+      }
+      return this.updateInteractionFlags(e, flag);
+    }
   }
 
   static _onPointerMove(e) {
@@ -336,6 +355,10 @@ class Input {
     this._pointer._wx = 0;
     this._pointer._wy = 0;
 
+    // this.updateInteractionFlags(app.stage, "drag");
+    // this.updateInteractionFlags(app.stage, "pointerup");
+    // this.updateInteractionFlags(app.stage, "drop");
+    
   }
 
   static isPointerMove() {

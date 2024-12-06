@@ -5,8 +5,9 @@ Container.prototype.remove = function(){
   if(!this.parent) return;
   this.parent.removeChild(this);
 }
-Texture.prototype.cut = function(rect){
+Texture.prototype.cut = function(rect, orig=false){
   this.frame = rect;
+  orig ? this.orig = rect : null;
   this.updateUvs();
 }
 

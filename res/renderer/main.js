@@ -1,5 +1,5 @@
 import { LGraph, LGraphCanvas, LiteGraph } from "litegraph.js";
-import * as PIXIJS from "../graph/pixijs/main.js";
+import {Editor} from "./queue.js";
 
 (() => {
   function ev() { this.init(...arguments) };
@@ -74,22 +74,20 @@ window.onload = function () {
   window.graph = graph;
 }
 
-function ready() {
+async function ready() {
   graph = new LGraph();
-  let canvas = document.getElementById("graph");
-  const width = document.body.clientWidth;
-  const hegiht = document.body.clientHeight;
-  canvas.width = canvas.style.width = width;
-  canvas.height = canvas.style.height = hegiht;
+  let canvas = document.getElementById("workspace");
+  let editor = new Editor();
+  await editor.init();
   new LGraphCanvas(canvas, graph);
-
-
-
-  readyTest();
-  graph.start(3000);
+  await editor.start({ graph, canvas });
+  // readyTest();
+  graph.start(1000);
+  globalThis.editor = editor;
 }
 
 function simpleDiscard(...types) {
+  
   for (let key in LiteGraph.registered_node_types) {
     types.forEach((t) => {
       let re = new RegExp(`^${t}`, "is");

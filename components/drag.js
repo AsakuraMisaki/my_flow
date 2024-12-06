@@ -3,16 +3,14 @@ import { Component } from "../core/Entity.js";
 // import { Editor, app, editor, renderer, stage } from "../core/editor.js";
 import { snap } from "../core/camera.js";
 import { STATIC, Input, InputEmitter } from "../core/interaction.js";
+import { ItemAble } from "./itemable.js";
 
 
 
-class Drag extends Component{
+class Drag extends ItemAble{
   constructor(){
     super();
-    this._target = null;
-    this.preventDefault = false;
     this._snapTarget = null;
-    this._itemMode = false;
   }
 
   get global(){
@@ -20,29 +18,6 @@ class Drag extends Component{
   }
   set global(v){
     Drag._global = v;
-  }
-  get target(){
-    return this._target;
-  }
-  set target(v){
-    if(this._itemMode && v){
-      v = this.processItemTarget() || v;
-    }
-    this._target = v;
-  }
-
-  processItemTarget(){
-    let children = Array.from(this.E.children);
-    let length = children.length;
-    for(let i=0; i<length; i++){
-      let t = children[i];
-      if(!Input.hitTest(t)) continue;
-      return t;
-    }
-  }
-
-  itemMode(){
-    this._itemMode = true;
   }
 
   setSnapTarget(e){
@@ -62,21 +37,22 @@ class Drag extends Component{
     else if(this.global) return;
     let pointerdown = Input.isTriggered(STATIC.MOUSE0);
     if(!pointerdown) return;
-    if(!Input.hitTest(this.E)) return;
-    this.target = this.global = this.E;
-    this.E.emit("c.drag.start", this.target);
-    this.preventDefault ? null : this.defaultDragStart();
+    this.updateHitTest();
+    if(this.target){
+      this.global = this.target;
+      this.emit("start", this.target);
+      this.preventDefault ? null : this.defaultDragStart();
+    }
   }
   async defaultDragStart(){
     let s = await snap(this._snapTarget || this.target);
     this.snap = s;
     s.alpha = 0.5;
-    let layer = editor.getLayer("ui");
-    layer.addChild(this.snap);
+    app.stage.addChild(this.snap);
   }
   updateDrag(){
     this.updateDragSnap();
-    this.E.emit("c.drag.ing", this.target);
+    this.emit("drag", this.target);
   }
   updateDragSnap(){
     if(!this.snap) return;
@@ -90,7 +66,7 @@ class Drag extends Component{
     if(this.global == this.target){
       this.global = null;
     }
-    this.E.emit("c.drag.end", this.target);
+    this.emit("end", this.target);
     this.target = null;
     this.snap ? (this.snap.destroy() && this.snap.remove()) : null;
     return true;

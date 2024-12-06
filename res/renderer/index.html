@@ -1,0 +1,48 @@
+<html>
+
+<head>
+  <link rel="stylesheet" type="text/css" href="./css/litegraph.css">
+  <script type="module" src="./main.js"></script>
+  <style>
+    body{
+      padding: 0;
+      margin: 0;
+      /* width: 2300px; */
+      overflow: hidden;
+    }
+    #container{
+      display: flex;
+      
+    }
+    #workspaceArea{
+      /* grid-row: 1; */
+      flex-grow: 9;
+      /* width: 1000px; */
+      /* height: 1000px; */
+    }
+    #workspace{
+      /* width: 100%; */
+      /* height: 100%; */
+    }
+    #users{
+      height: 100vh;
+      overflow: auto;
+      flex-grow: 1;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="container">
+    <div id="users">
+      <input class="search" placeholder="Search" />
+      <ul class="list"></ul>
+    </div>
+    <div id="workspaceArea">
+      <canvas id='workspace' style="margin: 0; padding: 0;"></canvas>
+    </div>
+    
+  </div>
+</body>
+  
+</html>

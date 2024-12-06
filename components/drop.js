@@ -8,37 +8,37 @@ class Drop extends ItemAble{
   constructor(){
     super();
     this._lastGlobal = null;
-    this._lastHit = false;
   }
 
   get global(){
     return Drag._global;
   }
 
+  onTargetChange(current, old){
+    current ? this.emit("over", current) : null;
+    old ? this.emit("leave", old) : null;
+    return;
+  }
+
   updateDragOver(){
     this._lastGlobal = this.global;
     if(!this._lastGlobal) return;
-    let hit = Input.hitTest(this.E);
-    if(!this._lastHit && hit){
-      this.E.emit("dragover", this._lastGlobal);
-    }
-    else if(!hit && this._lastHit){
-      this.E.emit("dragleave", this._lastGlobal);
-    }
-    this._lastHit = hit;
-    return this._lastHit;
+    this.updateHitTest();
   }
 
-  updateDrop(hit){
-    if(!hit || !this._lastGlobal) return;
+  updateDrop(){
+    if(!this._lastGlobal) return;
     let pointerup = !Input.isPressed(STATIC.MOUSE0, 0);
     if(!pointerup) return;
-    this.E.emit("drop", this._lastGlobal);
+    if(this.target){
+      this.emit("drop", this.target);
+    }
+    this.target = null;
     this._lastGlobal = null;
   }
 
   onUpdate(){
-    this.updateDrop(this._lastHit);
+    this.updateDrop();
     this.updateDragOver();
   }
 
