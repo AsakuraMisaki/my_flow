@@ -31,7 +31,7 @@ const layoutStyle = {
 // _userData = await _userData.text();
 // _userData = YAML.load(_userData);
 
-let _userData = {lastests:[]};
+let _userData = { lastests:[] };
 
 
 let items = _userData.lastests.map((data)=>{

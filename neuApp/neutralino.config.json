@@ -7,16 +7,19 @@
   "enableServer": true,
   "enableNativeAPI": true,
   "nativeAllowList": [
-    "app.*"
+    "app.*",
+    "filesystem.*",
+    "os.*"
   ],
   "modes": {
     "window": {
+      "injectGlobals": true,
       "title": "neuApp",
       "width": 1600,
-      "height": 720,
+      "height": 900,
       "minWidth": 400,
       "minHeight": 200,
-      "icon": "/www/icon.png"
+      "icon": "/src/res/icon.png"
     }
   },
   "cli": {
@@ -27,10 +30,9 @@
     "clientVersion": "5.5.0",
     "frontendLibrary": {
       "patchFile": "/src/dist/index.html",
-      "devUrl": "http://localhost:5173",
+      "devUrl": "http://127.0.0.1:5173/",
       "projectPath": "/src/",
-      "initCommand": "",
-      "devCommand": "BROWSER=none npm dev",
+      "devCommand": "npm run dev",
       "buildCommand": "npm run build"
     }
   }

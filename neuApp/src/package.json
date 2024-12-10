@@ -7,8 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "server": "node ./server/server.js",
-    "neu": "neu run",
-    "start": "npm-run-all dev -p neu"
+    "neu": "neu run"
   },
   "author": "",
   "license": "ISC",
