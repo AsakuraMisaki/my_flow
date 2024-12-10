@@ -1,0 +1,37 @@
+{
+  "applicationId": "js.neutralino.zero",
+  "version": "1.0.0",
+  "defaultMode": "window",
+  "documentRoot": "/src/dist/",
+  "url": "/",
+  "enableServer": true,
+  "enableNativeAPI": true,
+  "nativeAllowList": [
+    "app.*"
+  ],
+  "modes": {
+    "window": {
+      "title": "neuApp",
+      "width": 1600,
+      "height": 720,
+      "minWidth": 400,
+      "minHeight": 200,
+      "icon": "/www/icon.png"
+    }
+  },
+  "cli": {
+    "binaryName": "neuApp",
+    "resourcesPath": "/src/dist/",
+    "extensionsPath": "/extensions/",
+    "binaryVersion": "5.5.0",
+    "clientVersion": "5.5.0",
+    "frontendLibrary": {
+      "patchFile": "/src/dist/index.html",
+      "devUrl": "http://localhost:5173",
+      "projectPath": "/src/",
+      "initCommand": "",
+      "devCommand": "BROWSER=none npm dev",
+      "buildCommand": "npm run build"
+    }
+  }
+}

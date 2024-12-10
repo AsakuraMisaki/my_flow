@@ -4,18 +4,15 @@
   "description": "",
   "main": "./main.js",
   "scripts": {
-    "electron": "electron ./",
     "dev": "vite",
     "build": "vite build",
-    "pack": "electron-builder",
     "server": "node ./server/server.js",
-    "start0": "npm-run-all -p dev electron",
-    "start": "npm-run-all -p server dev"
+    "neu": "neu run",
+    "start": "npm-run-all dev -p neu"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@algolia/autocomplete-js": "^1.17.7",
     "@antv/x6": "^2.18.1",
     "@antv/x6-plugin-clipboard": "^2.1.6",
     "@antv/x6-plugin-dnd": "^2.1.1",
@@ -26,37 +23,18 @@
     "@antv/x6-plugin-selection": "^2.2.2",
     "@antv/x6-plugin-snapline": "^2.1.7",
     "@antv/x6-plugin-transform": "^2.1.8",
-    
-    "electron-vite": "^2.3.0",
+    "@neutralinojs/lib": "^5.5.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "antd": "^5.22.3",
     "js-yaml": "^4.1.0",
     "jsdoc-json": "^2.0.2",
     "list.js": "^2.3.1",
     "litegraph.js": "^0.7.18",
     "npm-run-all": "^4.1.5",
     "pixi.js": "^8.5.2",
-    "react-is": "^18.3.1",
-    "vite": "^5.4.10",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "vite": "^6.0.3",
     "ws": "^8.18.0"
-  },
-  "devDependencies": {
-    "electron": "^33.2.0",
-    "electron-builder": "^25.1.8",
-    "vite-plugin-electron-renderer": "^0.14.6"
-  },
-  "build": {
-    "appId": "com.by.queue",
-    "files": [
-      "dist/**/*",
-      "main.js"
-    ],
-    "win": {
-      "target": "nsis"
-    },
-    "mac": {
-      "target": "dmg"
-    },
-    "linux": {
-      "target": "AppImage"
-    }
   }
 }
