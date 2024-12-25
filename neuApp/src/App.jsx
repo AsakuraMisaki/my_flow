@@ -1,16 +1,16 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import Main from './workflow/Main.jsx';
-import { init, os, events } from '@neutralinojs/lib';
+
+import { Utils } from './workflow/Utils.js';
 
 
-const root = createRoot(document.body);
+const root = createRoot(document.getElementById("app"));
 root.render(<Main/>);
 
-init();
-events.on('ready', ()=>{
-  console.log("ok");
-})
+Utils._ready();
+
+
 
 
 

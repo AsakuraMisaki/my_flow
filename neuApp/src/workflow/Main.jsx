@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Flex, Layout, Splitter, Menu, theme } from 'antd';
 import Toolbar from './Toolbar';
 import Workspace from './Workspace';
 import Statebar from './Statebar';
-import * as YAML from 'js-yaml';
+
+
+import { GEV } from './Utils';
 const { Header, Footer, Sider, Content } = Layout;
 const headerStyle = {
   height: 48,
@@ -31,19 +33,22 @@ const layoutStyle = {
 // _userData = await _userData.text();
 // _userData = YAML.load(_userData);
 
-let _userData = { lastests:[] };
+// let _userData = { lastests:[] };
 
 
-let items = _userData.lastests.map((data)=>{
-  return { key: JSON.stringify(data), label: `[${data.type}] ${data.path}` };
-})
 
-let userData = { items, ctx:"sadasa" }
-console.log(userData);
 
-const Main = () => (
-  <Layout style={layoutStyle}>
-    <Toolbar style={headerStyle} items={items} title={userData.ctx}/>
+// let userData = { items, ctx:"sadasa" }
+// console.log(userData);
+
+const Main = () => {
+  
+  const [userData, setUserData] = useState({items:[], ctx:"sadasa"});
+  GEV.on("project:data:get", (data)=>{
+    setUserData(data);
+  })
+  return <Layout style={layoutStyle}>
+    <Toolbar style={headerStyle} items={userData.items} title={userData.ctx}/>
     <Content style={contentStyle}>
       <Workspace/>
     </Content>
@@ -51,5 +56,5 @@ const Main = () => (
       <Statebar/>
     </Footer>
   </Layout>
-);
+};
 export default Main;

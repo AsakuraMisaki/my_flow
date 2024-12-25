@@ -25,7 +25,10 @@ class EV {
     })
     return new Map(temp);
   }
-  clear() {
+  clear(name) {
+    if(name){
+      return this.events.delete(name);
+    }
     this.events.clear();
   }
   once(name, cb, z = 1) {

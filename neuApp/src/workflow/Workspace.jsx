@@ -3,16 +3,17 @@ import { Flex, Splitter, Typography, Menu, Collapse, List, Button } from 'antd';
 
 import { GEV, Utils } from './Utils';
 import Editor from './Workgraph';
+import Shower from './Block';
 const {Panel} = Collapse;
 
 function onClick(item){
-  let data = Utils.getData();
-  if(!data) return;
-  console.log(item);
-  if(!data[item.type]) return;
-  if(!data[item.type][item.key]) return;
-  console.log(data[item.type][item.key]);
-  GEV.emit("workspace:graph:source", data[item.type][item.key]);
+  // let data = Utils.getData();
+  // if(!data) return;
+  // console.log(item);
+  // if(!data[item.type]) return;
+  // if(!data[item.type][item.key]) return;
+  // console.log(data[item.type][item.key]);
+  GEV.emit("workspace:build", item.type, item.key);
 }
 
 const Workspace = () => {
@@ -34,13 +35,13 @@ const Workspace = () => {
     <Splitter.Panel defaultSize="13%" min="13%" max="50%">
       {
         list.map(item => (
-          <Collapse>
-          <Panel header={item.label} key={item.key}>
+          <Collapse key={item.key}>
+          <Panel header={item.label}>
             <List
                 itemLayout="horizontal"
                 dataSource={item.items}
                 renderItem={(item, index) => (
-                  <List.Item>
+                  <List.Item key={item.key}>
                     <a onClick={onClick.bind({}, item)}>
                       {item.key}{ item.label }
                     </a>
@@ -54,6 +55,7 @@ const Workspace = () => {
     </Splitter.Panel>
     <Splitter.Panel style={{minHeight:"100%"}}>
       <Editor/>
+      {/* <Shower/> */}
     </Splitter.Panel>
   </Splitter>
 };

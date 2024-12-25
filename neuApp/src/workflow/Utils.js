@@ -1,18 +1,47 @@
 
 import { EV } from "../core/ev";
-
-
+import { events, filesystem, init, os } from '@neutralinojs/lib';
+import * as YAML from 'js-yaml';
 
 
 const GEV = new EV();
 
+
+
 class Utils{
+  static _ready(){
+    init();
+    this._nodeMovable = true;
+    events.on("ready", ()=>{
+      this.getUserData();
+    })
+  }
+
   static async LoadProject(type, path){
+    GEV.clear("workspace:build");
     if(type == "Q"){
       let project = new Qproject();
       await project.load(path);
       this.project = project;
     }
+  }
+
+  static get nodeMovable(){
+    return this._nodeMovable;
+  }
+  static setNodeMovable(value=false){
+    this._nodeMovable = value;
+  }
+
+  static async getUserData(){
+    let data = await filesystem.readFile("./src/workflow/user.yaml");
+    data = YAML.load(data);
+    let items = data.lastests.map((data)=>{
+      return { key: JSON.stringify(data), label: `[${data.type}] ${data.path}` };
+    })
+    const userData = {items, ctx: "aaaaaa"};
+    
+    GEV.emit("project:data:get", userData);
   }
 
   static getData(){
@@ -35,7 +64,7 @@ class UIproject extends Project{
 }
 
 const Qproject_Constant = {
-  files: ["Actors.json", "Enemies.json", "Skills.json", "Items.json", "States.json"]
+  files: ["Actors", "Enemies", "Skills", "Items", "States"]
 }
 class Qproject extends Project{
   constructor(){
@@ -45,99 +74,83 @@ class Qproject extends Project{
   }
 
   async load(folder){
-    // this.folder = folder + "\\";
-    // let self = this;
-    // ipcRenderer.once("read-file-response", (event, data)=>{
-    //   console.log(data);
-    //   if(!data.success && data.err=="nofile"){
-    //     ipcRenderer.send("save-file", this.folder+"wf_Qproject.json", JSON.stringify({}));
-    //     self.create();
-    //   }
-    //   else{
-    //     self.create(data);
-    //   }
-    // })
-    // ipcRenderer.send("read-file", { filePath: this.folder+"wf_Qproject.json" })
+    this.folder = folder + "\\";
+    this.create();
   }
 
-  dataCache(event, data, all, _self){
-    console.log(event, data);
-    if(!data.success) return;
-    _self.caches.set(data.filePath.replace(_self.folder, ""), JSON.parse(data.plain));
-    all.shift();
-    console.log(all);
-  }
 
-  waitData(...files){
-    // let resolve;
-    // let target = new Promise((re, r)=>{resolve=re});
-    // let all = Array.from(files).map(()=>{
-    //   return { };
-    // })
-    // this._dataCahe = (event, data)=>{ this.dataCache(event, data, all, this )};
-    // ipcRenderer.on("read-file-response", this._dataCahe)
-    // Array.from(files).map((f)=>{
-    //   let filePath = this.folder + f;
-    //   ipcRenderer.send("read-file", { filePath });
-    // })
-    // requestAnimationFrame(this.updateWaitData.bind(this, all, resolve));
-    // return target;
-  }
-
-  updateWaitData(all, resolve){
-    if(!all.length){
-      resolve(1);
-      return;
-    }
-    requestAnimationFrame(this.updateWaitData.bind(this, all, resolve));
-  }
-
-  async create(cacheWorkData){
-    await this.waitData(...Qproject_Constant.files);
-    let data = this.caches;
-    
-    cacheWorkData = JSON.parse(cacheWorkData.plain);
-    console.log(cacheWorkData);
-    // let userData = cacheWorkData.userData;
-    // cacheWorkData = cacheWorkData.data;
-    // let custom = {
-    //   "Battler": "Actors.json",
-    //   "Ene": "Enemies.json",
-    //   "Skill": "Skills.json",
-    //   "State": "States.json",
-    // }
-    // let newCache = { };
-    // for(let key in cacheWorkData){
-    //   let id = /(\d+)/i.exec(key)[1];
-    //   let key0 = key.replace(id, "");
-    //   let scope = custom[key0];
-    //   newCache[scope] = newCache[scope] || { };
-    //   newCache[scope][id] = cacheWorkData[key];
-    // }
-    // newCache = {data:newCache, userData};
-    // console.log(newCache);
-    // ipcRenderer.send("save-file", this.folder+"wf_Qproject.json", JSON.stringify(newCache));
-    // ipcRenderer.off("read-file-response", this._dataCahe);
-    
-    let list = [];
-    data.forEach((contentItems, filePath)=>{
-      contentItems = contentItems.filter((item)=>item);
-      let items = contentItems.map((data, i)=>{
-        return { key:data.id, label:data.name, type:filePath }
-      })
-      let result = { label:filePath, items, key:filePath };
-      list.push(result);
+  async getFolderData(...files){
+    let data = {};
+    const all = files.map(async (f)=>{
+      let target = await filesystem.readFile(this.folder + f + ".json");
+      target = JSON.parse(target);
+      data[f] = target;
     })
+    await Promise.all(all);
+    return data;
+  }
+
+  async getProjectData(){
+    try{
+      let workData = await filesystem.readFile(this.folder + "wf_Qproject.yaml");
+      workData = YAML.load(workData);
+      return workData;
+    }catch(e){
+      if(e.code == "NE_FS_DIRCRER"){
+        // workData = { };
+      }
+      return { };
+    }
+  }
+
+  async create(){
+    let folderData = await this.getFolderData(...Qproject_Constant.files);
+    
+    let workData = await this.getProjectData();
+    console.log(folderData, workData);
+    let list = [];
+    for(let type in folderData){
+      const arr = folderData[type].filter((data)=>data);
+      let items = arr.map((data, i)=>{
+        return { key:data.id, label:data.name, type }
+      })
+      let result = { label:type, items, key:type };
+      list.push(result);
+    }
+
     console.log(list);
     
     GEV.emit("workspace:list:change", list);
-    this.caches.clear();
-    this.workCaches = cacheWorkData.data;
-    // changeItems(items);
+    this.folderData = folderData;
+    this.workData = workData;
+    GEV.on("workspace:build", this.buildGraph.bind(this));
+  }
+
+  async buildGraphFromOld(type, id){
+    let types = {
+      "Actors": SQ.Battler, 
+      "Enemies": SQ.Ene, 
+      "Skills": SQ.Skill, 
+      "Items": SQ.Item, 
+      "States": SQ.State
+    }
+    if(!types[type]) return;
+    let data = this.folderData[type][id];
+    if(!data) return;
+    let cache = SQ.preCompliedFixTest(data, types[type]);
+    console.log(cache);
+  }
+
+  async buildGraph(type, id){
+    if(this.workData[type] && this.workData[type][id]){
+      GEV.emit("workspace:graph:source", this.workData[type][id]);
+      return;
+    }
+    this.buildGraphFromOld(type, id);
   }
 
   getData(){
-    return this.workCaches;
+    return this.workData;
   }
 
 
