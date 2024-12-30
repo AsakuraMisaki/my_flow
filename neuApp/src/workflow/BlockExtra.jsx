@@ -79,7 +79,7 @@ export function ActionMenuCard({listeners}){
             <img src="./workflow/font/delete.svg" style={{width:13, height:13}}/>
             <img src="./workflow/font/add.svg" style={{width:13, height:13}}/>
             <img src="./workflow/font/loop.svg" style={{width:13, height:13}}/>
-            <img src="./workflow/font/add.svg" style={{width:13, height:13}}/>
+            <img src="./workflow/font/cycle.svg" style={{width:13, height:13}}/>
             <img {...listeners} src="./workflow/font/move.svg" style={{width:13, height:13}}/>
           </Flex>
       </Space>)
