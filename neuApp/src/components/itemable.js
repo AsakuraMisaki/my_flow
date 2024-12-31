@@ -1,4 +1,4 @@
-import { Component } from "../core/Entity.js";
+import { Component } from "../core/entity.js";
 import { Input } from "../core/interaction.js";
 
 class ItemAble extends Component{

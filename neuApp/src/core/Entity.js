@@ -1,119 +1,112 @@
 import { Container, Sprite, Text, Texture, Transform } from "pixi.js";
 import { EV } from "./ev.js";
 
-Container.prototype.remove = function(){
-  if(!this.parent) return;
-  this.parent.removeChild(this);
-}
+
 Texture.prototype.cut = function(rect, orig=false){
   this.frame = rect;
   orig ? this.orig = rect : null;
   this.updateUvs();
 }
+Container.prototype.remove = function update(destroy) {
+  if(this.parent){
+    this.parent.removeChild(this);
+  }
+  destroy ? this.destroy() : null;
+  this.emit("remove");
+}
+Container.prototype.update = function update(delta) {
+  this._updateChildren();
+  if(!this._entity) return;
+  this._entity.update(this, delta);
+}
+Container.prototype._updateChildren = function _updateChildren(delta) {
+  let children = Array.from(this.children).reverse();
+  let length = children.length;
+  for (let i = 0; i < length; i++) {
+    let c = children[i];
+    c.update ? c.update(delta) : null;
+  }
+}
 
-class ContainerEntity extends Container{
+export class EnityBase extends EV{
   constructor(){
-    super(...arguments);
-    this.asEntity();
-  }
-}
-
-class SpriteEntity extends Sprite{
-  constructor(){
-    super(...arguments);
-    this.asEntity();
-  }
-}
-
-class TextEntity extends Text{
-  constructor(){
-    super(...arguments);
-    this.asEntity();
-  }
-}
-
-const MixIn = function MixIn(targetClass, targetObject, ignores=[]){
-  for (const [key, value] of Object.entries(targetObject)) {
-    let pre = targetClass.prototype[key];
-    if(pre && typeof(pre) == "function"){
-      targetClass.prototype[key] = function(){
-        pre.call(this, ...arguments);
-        value.call(this, ...arguments);
-      }
-    }
-    else if(typeof(value) == "function"){
-      targetClass.prototype[key] = value;
-    }
-    else if(typeof(value) == "object"){
-      Object.defineProperty(targetClass.prototype, key, value);
-    }
-  }
-}
-
-const Entity = {
-
-  async asEntity(){
+    super();
     this._delta = 0;
     this._timeScale = 1;
+    this._pauses = new Set();
+    this.features();
+  }
+  features(){ }
+  async ready(target){
+    this.onReady(target);
+  }
+
+  onReady(target){
+    this.emit("ready");
+  }
+
+  pause(id){
+    this._pauses.add(id);
+  }
+
+  resume(id){
+    this._pauses.remove(id);
+  }
+
+  update(delta){
+    if(this._pauses.size) return;
+    this.onUpdate(delta);
+    this.emit("update", delta);
+  }
+
+  onUpdate(delta){
+    
+  }
+}
+
+export class Enity extends EnityBase{
+
+  static async attach(gameObject, entity=new Enity()){
+    await entity.ready(gameObject);
+    gameObject._entity = entity;
+    entity._gameObject = gameObject;
+    return entity;
+  }
+
+  static disAttach(entity=new Enity()){
+    if(!entity.gameObject) return;
+    if(entity.gameObject._entity == entity){
+      entity.gameObject._entity = null;
+    }
+    entity._gameObject = null;
+  }
+
+  constructor(){
+    super();
+  }
+
+  features(){
     this._tags = new Set();
     this._components = new Map();
-    this._pause = true;
-    await this.ready();
-    this.onReady();
-  },
-
-  delta: {
-    get: function(){
-      return this._delta * this._timeScale;
-    }
-  },
-
-  destroy(){
-    this._destroy = true;
-  },
-
-  async ready() {
-    
-  },
-
-  onReady() {
-    this._pause = false;
-    this.emit("ready");
-  },
-
-  async onDestroy() {
-    this._onDestroy = true;
-    super.destroy();
-    this.remove();
-    this._destroy = false;
-  },
-
-  onUpdate(delta) {
-    this._updateChildren(delta);
-    this._updateComponents(delta);
-  },
+  }
 
   addTag(tag) {
     this._tags.add(tag);
-  },
-
+  }
   removeTag(tag) {
     this._tags.remove(tag);
-  },
-
+  }
   findChildrenByTag(c, tag) {
     if (c._tags && c._tags.has(tag)) {
       return true;
     }
-  },
-
+  }
   findChildrenByClass(c, tClass, isSub) {
     if (isSub) {
       return c instanceof tClass;
     }
     return c.constructor === tClass;
-  },
-
+  }
   findChildren(valid, temp = []) {
     this.children.forEach((c) => {
       if (valid(c)) {
@@ -124,45 +117,29 @@ const Entity = {
       }
     })
     return temp;
-  },
+  }
 
-  addComponent(id, target) {
-    if(typeof(target) == "function" && target.prototype instanceof Component){
-      target = new target();
-    }
+  onUpdate(delta){
+    this._updateComponents(delta);
+  }
+
+  async addComponent(id, target=new Component()){
     target._E = this;
+    await target.ready();
     this._components.set(id, target);
     return target;
-  },
+  }
 
-  removeComponent(id) {
+  removeComponent(id){
     let target = this.getComponent(id);
     target ? target.destroy() : null;
-  },
+  }
 
   getComponent(id){
-    return this._components.get(id) || this._components.get(String(id).toLowerCase());
-  },
+    return this._components.get(id);
+  }
 
-  _updateChildren(delta) {
-    let children = Array.from(this.children).reverse();
-    let length = children.length;
-    for (let i = 0; i < length; i++) {
-      let c = children[i];
-      if (c._destroy) {
-        let index = i;
-        i--;
-        if(c._onDestroy) continue;
-        c.onDestroy().then(()=>{
-          this.removeChildAt(index);
-        });
-        continue;
-      }
-      c.update ? c.update(delta) : null;
-    }
-  },
-
-  _updateComponents(delta) {
+  _updateComponents(delta){
     this._components.forEach((c, id, map)=>{
       if(c._destroy){
         if(c._onDestroy) return;
@@ -174,89 +151,47 @@ const Entity = {
       }
       c.update ? c.update(delta) : null;
     })
-  },
-
-  pause(){
-    this._pause = true;
-  },
-
-  resume(){
-    this._pause = false;
-  },
-
-  update(delta) {
-    if(this._pause) return;
-    this._delta = delta;
-    let d = this.delta;
-    this.onUpdate(d);
-    this.emit("update", delta);
-  },
-
-  __bp__(data) { //blue print default support
-    console.log(data);
   }
+
+  get delta(){
+    return this._delta * this._timeScale;
+  }
+
+  get gameObject(){
+    return this._gameObject;
+  }
+  get children(){
+    return this.gameObject.children;
+  }
+
 }
 
-class Component extends EV{
+export class Component extends EnityBase{
   constructor(){
     super();
-    this.setup();
   }
 
-  async setup(){
+  features(){
     this._E = null;
     this._destroy = false;
-    this._pause = true;
-    await this.ready();
-    this.onReady();
   }
 
   get E(){
     return this._E;
   }
   get delta(){
-    return this.E._delta * this.E._timeScale;
+    return this.E.delta;
   }
-
-  async ready(){ 
-    
-  }
-
-  onReady(){
-    this._pause = false;
-    this.emit("ready");
+  get gameObject(){
+    return this.E.gameObject;
   }
 
   destroy(){
     this._destroy = true;
   }
 
-  pause(){
-    this._pause = true;
-  }
-
-  resume(){
-    this._pause = false;
-  }
-
   async onDestroy(){
     this._onDestroy = true;
   }
 
-  onUpdate(delta){
-    
-  }
-
-  update(delta){
-    if(this._pause) return;
-    this.onUpdate(delta);
-    this.emit("update", delta);
-  }
-
 }
-
-MixIn(ContainerEntity, Entity);
-MixIn(SpriteEntity, Entity);
-MixIn(TextEntity, Entity);
-
-export { Entity, Component, TextEntity, SpriteEntity, ContainerEntity };

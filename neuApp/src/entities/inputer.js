@@ -1,5 +1,5 @@
 import { Graphics } from "pixi.js";
-import { ContainerEntity } from "../core/Entity.js";
+import { ContainerEntity } from "../core/entity.js";
 
 class Inputter extends ContainerEntity{
   constructor(targetWidth, targetHeight){

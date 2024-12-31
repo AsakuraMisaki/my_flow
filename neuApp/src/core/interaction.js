@@ -1,6 +1,8 @@
 
 import { Assets, EventBoundary, Loader, Point, Rectangle, Resolver, extensions } from "pixi.js";
 import { EV } from "./ev.js";
+import { Utils } from "../workflow/Utils.js";
+import { Component } from "./entity.js";
 // import { app } from "./editor.js";
 
 const STATIC = { MOUSE0: { key:"m0" }, MOUSE1: {key: "m1"}, MOUSE2: { key: "m2"}  };
@@ -473,5 +475,284 @@ class Input {
   }
 
 }
+
+class ConfigAdvanceInput{
+  static async _init(){
+      this.motions = new Map();
+      
+      this.POINTRE_0 = "m0";
+      this.POINTRE_1 = "m1";
+      this.POINTRE_2 = "m2";
+
+      this.STATES_POINTER_MOVE = "STATES_POINTER_MOVE";
+      this.STATES_UP = "STATES_UP";
+      this.STATES_DOWN = "STATES_DOWN";
+      this.STATES_PRESS = "STATES_PRESS";
+      this.STATES_REPEAT = "STATES_REPEAT";
+      this.STATES_WHEEL = "STATES_WHEEL";
+  }
+  constructor(...keys){
+      this.key = keys;
+  }
+  makeKey(){
+      if(typeof(this.key) == 'string') return;
+      this.key = ConfigAdvanceInput.makeKey(this.key);
+  }
+  static makeKey(keys, sort=true){
+      let key = "";
+      if(sort){
+          keys = keys.sort();
+      }
+      keys.forEach((k)=>{
+          key += k + " ";
+      })
+      return key.trim();
+  }
+  static create(...keys){
+      let config = new ConfigAdvanceInput(...keys);
+      return config;
+  }
+  sort(){
+      this.key = this.key.sort();
+      return this;
+  }
+  motion(motion, state=ConfigAdvanceInput.STATES_DOWN, stateTime=0){
+      this.makeKey();
+      let data = ConfigAdvanceInput.motions.get(this.key);
+      if(!data){
+          data = { };
+          data[state] = data[state] || new Set();
+          ConfigAdvanceInput.motions.set(this.key, data);
+      }
+      data[state].add({ stateTime, motion });
+      return this;
+  }
+  static getMotions(key, state){
+      let data = ConfigAdvanceInput.motions.get(key);
+      if(!data) return;
+      if(!data[state]) return;
+      return Array.from(data[state]);
+  }
+}
+
+
+class AndvanceInput extends Component{
+  static async _init(){
+      let mapper = await Assets.load("../core/input.yaml");
+      const pf = { passive: false };
+      
+
+      ConfigAdvanceInput._init();
+      ConfigAdvanceInput.create(ConfigAdvanceInput.POINTRE_0).sort().motion("test");
+      
+      this.ev = new EV();
+      this.watches = new Map();
+      this.caches = new Map();
+      this.pointer = { x:0, y:0 };
+      this.setupEvents();
+  }
+
+  static once(){ this.ev.once(...arguments) }
+  static on(){ this.ev.on(...arguments) }
+  static emit(){ this.ev.emit(...arguments) }
+  static off(){ this.ev.off(...arguments) }
+  static clear(){ this.ev.clear(...arguments) }
+  static clearMethods(){ this.ev.clearMethods(...arguments) }
+
+  static setupEvents(){
+      document.addEventListener('pointerdown', (e)=>{ 
+          this.onPointerDown(e);
+      })
+      document.addEventListener('pointermove', (e)=>{ 
+          this.onPointerMove(e); 
+      })
+      document.addEventListener('pointerup', (e)=>{ 
+          this.onPointerUp(e);
+      })
+      document.addEventListener('keydown', (e)=>{ 
+          this.onKeyDown(e);
+      })
+      document.addEventListener('keyup', (e)=>{ 
+          this.onKeyUp(e);
+      })
+      document.addEventListener('wheel', (e)=>{ 
+          this.onWheel(e);
+      })
+      Utils.app.ticker.add(this.update, this);
+      this.once("motion:test", ()=>{
+          console.warn("asa");
+      })
+  }
+  
+
+  static update(){
+      let minInterval = -Infinity;
+      let combineKey = [];
+      this.caches.forEach((info, key, map)=>{
+          info.interval += Graphics.app.ticker.deltaMS * info.press;
+          let i = info.interval;
+          if(i <= -this.maxRepeatInterval()){
+              map.delete(key);
+          }
+          if(info.press >= 1){
+              combineKey.push(key);
+              minInterval = Math.min(i, minInterval);
+          }
+          this.possiblePress(key, info.interval);
+      })
+      if(combineKey.length){
+          this.possiblePress(ConfigAdvanceInput.makeKey(combineKey), minInterval);
+      }
+  }
+
+  static maxRepeatInterval(){
+      return 1500;
+  }
+
+  static _saveConfig(){
+      
+  }
+
+  static _loadConfig(){
+
+  }
+
+  static get pointer(){
+    if(!Utils.app) return;
+    return Utils.app.renderer.events.pointer.global;
+  }
+
+  static _onPointerMove(event){
+      
+  }
+  
+  static onPointerMove(e){
+      this.emit("pointermove", e);
+      this.triggerMotions([
+          { key: ConfigAdvanceInput.POINTRE_0, state: ConfigAdvanceInput.STATES_POINTER_MOVE }
+      ], undefined, this.pointer)
+  }
+
+  static onWheel(e){
+      this.emit("wheel", e);
+      const {x, y} = e;
+      this.triggerMotions([
+          { key: ConfigAdvanceInput.POINTRE_0, state: ConfigAdvanceInput.STATES_WHEEL }
+      ], undefined, {x, y})
+  }
+
+  static onPointerDown(e){
+      this.emit("pointerdown", e);
+      if(e.button != undefined){
+          let key = `m${e.button}`;
+          this.onKeyDown({key});
+      }
+  }
+
+  static onPointerUp(e){
+      this.emit("pointerup", e);
+      if(e.button != undefined){
+          let key = `m${e.button}`;
+          this.onKeyUp({key});
+      }
+  }
+
+  static triggerMotions(data, filter, ...args){
+      data.forEach(({key, state})=>{
+          let motions = ConfigAdvanceInput.getMotions(key, state);
+          if(!motions) return;
+          if(filter){
+              motions = motions.filter(filter);
+          }
+          motions.forEach((data)=>{
+              this.emit(`motion:${data.motion}`, ...args);
+          })
+      })
+  }
+  
+  static onKeyDown(e){
+      if(e.repeat) return;
+      const key = e.key.toLowerCase();
+      if(key == "f8" || key == "f12") return;
+      this.emit(`keydown:${key}`);
+      this.possibleRepeat(key);
+      this.caches.set(key, { interval:0, press:1 });
+      let tempKeys = [];
+      Array.from(this.caches.entries()).forEach(([key, value])=>{
+          if(value.press < 0) return;
+          tempKeys.push(key);
+      })
+      let combineKey = ConfigAdvanceInput.makeKey(tempKeys);
+      this.emit(`keydown:${combineKey}`);
+      console.log(ConfigAdvanceInput.motions, combineKey);
+      this.triggerMotions([
+          { key: combineKey, state: ConfigAdvanceInput.STATES_DOWN },
+          { key: key, state: ConfigAdvanceInput.STATES_DOWN },
+      ])
+  }
+
+  static possibleRepeat(key){
+      let info = this.caches.get(key);
+      if(!info) return;
+      let i = info.interval;
+      this.triggerMotions([
+          { key: key, state: ConfigAdvanceInput.STATES_REPEAT },
+      ], (data)=>{
+          return -data.stateTime >= i;
+      })
+  }
+
+  static possiblePress(key, interval=0){
+      // let info = this.caches.get(key);
+      // if(!info) return;
+      // let i = info.interval;
+      this.triggerMotions([
+          { key, state: ConfigAdvanceInput.STATES_PRESS },
+      ], (data)=>{
+          return data.stateTime <= interval;
+      })
+  }
+
+  static onKeyUp(e){
+      const key = e.key.toLowerCase();
+      this.emit(`keyup:${key}`);
+      this.caches.set(key, { interval:-1, press:-1 });
+      // let combineKey = ConfigAdvanceInput.makeKey(Array.from(this.caches.keys()));
+      // this.emit(`keydown:${combineKey}`);
+
+      this.triggerMotions([
+          { key: key, state: ConfigAdvanceInput.STATES_UP },
+      ])
+  }
+
+  static addWatches(motion, ...e){
+      if(!this.watches.get(motion)){
+          this.watches.set(motion, new Map());
+      }
+      let targetGroup = this.watches.get(motion);
+      e.forEach((_)=>{
+          targetGroup.set(_, { group:targetGroup, pause:false });
+      })
+  }
+  
+  static removeWatches(...e){
+      e.forEach((_)=>{
+          this.watches.forEach(motionWatches=>{
+              motionWatches.delete(e);
+          })
+      })
+  }
+  
+  static clearWatches(motion){
+      if(motion){
+          this.watches.delete(motion);
+          return;
+      }
+      this.watches.clear();
+  } 
+
+  
+}
+AndvanceInput._init();
 
 export { Input, InputEmitter, STATIC }

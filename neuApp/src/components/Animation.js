@@ -1,5 +1,5 @@
 import { Container } from "pixi.js";
-import { Component } from "../core/Entity.js";
+import { Component } from "../core/entity.js";
 
 class Animation{
   constructor(textures, animations){

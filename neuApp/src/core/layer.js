@@ -1,6 +1,6 @@
 import { Application, Assets, Texture } from "pixi.js";
 import { BaseSprite } from "../components/displayObject.js";
-import { ContainerEntity, Entity } from "./Entity.js";
+import { ContainerEntity, Entity } from "./entity.js";
 import { Drag } from "../components/drag.js";
 import { Drop } from "../components/drop.js";
 

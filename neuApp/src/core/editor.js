@@ -1,95 +1,34 @@
-import { Application, Assets, Texture, Container, Rectangle, Graphics, mSDFBit } from "pixi.js";
-import { ContainerEntity, Entity, SpriteEntity, TextEntity } from "./Entity.js";
-import { Drag } from "../components/drag.js";
-import { Drop } from "../components/drop.js";
-import { Layer } from "./layer.js";
-import { Input } from "./interaction.js";
-import { YAML } from "./yaml.js";
-import { Hover } from "../components/hover.js";
-import { Grid, Layout } from "../components/layout.js";
-import { ScreenPrinter } from "./utils.js";
-import { list } from "../entities/queue/list.js";
+import { Container } from "pixi.js";
+import { Utils } from "../workflow/Utils";
+import { Component, Enity } from "./entity";
+import { AdvanceInput } from "../components/advanceInput";
+import { FrameLike } from "../workflow/DragToMake";
+import { Pane } from "tweakpane";
 
-
-class Editor extends ContainerEntity {
-  constructor() {
-    super();
-    this._layerMaps = new Map();
-    // this.renderable = false;
-
+export class Editor{
+  static async init(){
+    let stage = Utils.app.stage;
+    stage.hitArea = Utils.app.screen;
+    let entity = await Enity.attach(stage);
+    let input = new AdvanceInput();
+    entity.addComponent("input", input);
+    input.on("pointerdown", FrameLike.onDragStart.bind(input));
+    input.on("pointerup", FrameLike.onDragEnd.bind(input));
+    this.initPane();
   }
-
-  addLayer(id, options) {
-    const L = new Layer();
-    Object.assign(L, options);
-    L.label = id;
-    this._layerMaps.set(id, L);
-    this.addChild(L);
-    this.children.sort((a, b) => {
-      return (a.zIndex || 1) - (b.zIndex || 1);
+  static initPane(){
+    this.pane = new Pane({container:document.getElementById("pane")});
+    const pane = this.pane;
+    const PARAMS = {
+      width: 123,
+      title: 'hello',
+      color: '#ff0055',
+    }
+    let w = pane.addBinding(PARAMS, 'width');
+    w.on("change", (ev)=>{
+      Utils.app.stage.children[0].width = ev.value;
     })
-    return L;
-  }
-
-  getLayer(id) {
-    const L = this._layerMaps.get(id);
-    return L;
-  }
-
-  removeLayer(id) {
-    const L = this._layerMaps.get(id);
-    L.remove();
-  }
-
-  onUpdate(delta) {
-    super.onUpdate(delta);
-    Input.update(delta);
-  }
-
-  async onReady() {
-    super.onReady();
-    await Input.setup(app);
-    let qList = new list();
-    this.addChild(qList);
+    pane.addBinding(PARAMS, 'title');
+    pane.addBinding(PARAMS, 'color');
   }
 }
-
-
-
-
-async function ready() {
-  const app = new Application();
-
-  // Initialize the application
-  let targetCanvas = document.getElementById("workspace");
-  await app.init({ background: '#1099bb', canvas:targetCanvas, resizeTo:targetCanvas });
-
-  // Append the application canvas to the document body
-  // document.body.appendChild(app.canvas);
-
-  const renderer = app.renderer;
-  const stage = app.stage;
-
-  globalThis.app = app;
-
-  const update = function (ticker) {
-    stage.children.forEach((c) => {
-      c.update ? c.update(ticker.deltaMS) : null;
-    })
-  }
-  app.ticker.add(update);
-
-  // window.app = app;
-
-  let editor = new Editor();
-  stage.addChild(editor);
-}
-
-window.onload = function(){
-  console.warn("?");
-  ready();
-}
-
-export { Editor, Input, ready };
-
-

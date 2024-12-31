@@ -1,4 +1,4 @@
-import { Component } from "../core/Entity.js";
+import { Component } from "../core/entity.js";
 import { Input, STATIC } from "../core/interaction.js";
 import { Drag } from "./drag.js";
 import { ItemAble } from "./itemable.js";

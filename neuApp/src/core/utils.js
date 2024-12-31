@@ -1,6 +1,6 @@
 import { FPS } from "../components/fps.js";
 import { Grid } from "../components/layout.js";
-import { ContainerEntity, TextEntity } from "./Entity.js";
+import { ContainerEntity, TextEntity } from "./entity.js";
 
 class UPromise{
   static new(){

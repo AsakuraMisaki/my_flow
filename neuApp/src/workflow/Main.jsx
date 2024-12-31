@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { Component, useEffect, useState } from 'react';
 import { Flex, Layout, Splitter, Menu, theme } from 'antd';
 import Toolbar from './Toolbar';
 import Workspace from './Workspace';
 import Statebar from './Statebar';
 
 
-import { GEV } from './Utils';
+import { GEV, Utils } from './Utils';
+import { BaseComponents } from './baseComponents';
 const { Header, Footer, Sider, Content } = Layout;
 const headerStyle = {
   height: 48,
@@ -29,12 +30,6 @@ const layoutStyle = {
   height: '100%',
 };
 
-// let _userData = await fetch("./workflow/user.yaml");
-// _userData = await _userData.text();
-// _userData = YAML.load(_userData);
-
-// let _userData = { lastests:[] };
-
 
 
 
@@ -42,19 +37,23 @@ const layoutStyle = {
 // console.log(userData);
 
 const Main = () => {
-  
   const [userData, setUserData] = useState({items:[], ctx:"sadasa"});
   GEV.on("project:data:get", (data)=>{
     setUserData(data);
   })
+  useEffect(()=>{
+    Utils._ready();
+  }, [])
+  
   return <Layout style={layoutStyle}>
-    <Toolbar style={headerStyle} items={userData.items} title={userData.ctx}/>
+    {/* <Toolbar style={headerStyle} items={userData.items} title={userData.ctx}/> */}
     <Content style={contentStyle}>
       <Workspace/>
     </Content>
-    <Footer style={footerStyle}>
+    <BaseComponents/>
+    {/* <Footer style={footerStyle}>
       <Statebar/>
-    </Footer>
+    </Footer> */}
   </Layout>
 };
 export default Main;

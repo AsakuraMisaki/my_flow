@@ -1,5 +1,5 @@
 import { Assets, Container, Rectangle, Sprite, Texture } from "pixi.js";
-import { Component } from "../core/Entity.js";
+import { Component } from "../core/entity.js";
 import { BaseContainer, BaseSprite } from "./displayObject.js";
 
 class AnimationLayer extends Component{

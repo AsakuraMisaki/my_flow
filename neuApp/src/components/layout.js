@@ -1,4 +1,4 @@
-import { Component } from "../core/Entity.js";
+import { Component } from "../core/entity.js";
 
 class Layout extends Component{
   constructor(){

@@ -1,5 +1,5 @@
 import { Container, Sprite } from "pixi.js";
-import GameObject from "./Entity.js";
+import GameObject from "./entity.js";
 
 class Actor extends GameObject{
   constructor() {

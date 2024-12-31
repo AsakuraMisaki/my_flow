@@ -1,4 +1,4 @@
-import { Component } from "../core/Entity.js";
+import { Component } from "../core/entity.js";
 
 class FPS extends Component{
   constructor(target){

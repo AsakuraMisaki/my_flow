@@ -2,19 +2,57 @@
 import { EV } from "../core/ev";
 import { events, filesystem, init, os } from '@neutralinojs/lib';
 import * as YAML from 'js-yaml';
+import { Application, Assets, Container, Loader, Sprite, Texture } from 'pixi.js';
+import { Component } from "../core/entity.js";
+import { AdvanceInputSystem, ConfigAdvanceInput } from "../components/advanceInput";
+import { loader } from "../core/yaml";
+import { Editor } from "../core/editor";
+
 
 
 const GEV = new EV();
 
 
-
 class Utils{
-  static _ready(){
-    init();
+  static async _ready(){
+    // init();
+    
+    const app = new Application();
+
+    let target = document.getElementById("protoEditor");
+    // Initialize the application
+    await app.init({ background: '#f5f5f5', resizeTo:target });
+    
+    target.appendChild(app.canvas);
+    this._app = app;
     this._nodeMovable = true;
     events.on("ready", ()=>{
       this.getUserData();
     })
+    GEV.emit("ready");
+    globalThis.app = app;
+
+    const update = function (ticker) {
+      app.stage.update(ticker.deltaMS);
+      
+    }
+    app.ticker.add(update);
+    await AdvanceInputSystem._init();
+    ConfigAdvanceInput.create(ConfigAdvanceInput.POINTRE_0)
+    .sort()
+    .motion("pointerdown", ConfigAdvanceInput.STATES_DOWN);
+    ConfigAdvanceInput.create(ConfigAdvanceInput.POINTRE_0)
+    .sort()
+    .motion("pointermove", ConfigAdvanceInput.STATES_POINTER_MOVE);
+    ConfigAdvanceInput.create(ConfigAdvanceInput.POINTRE_0)
+    .sort()
+    .motion("pointerup", ConfigAdvanceInput.STATES_UP);
+
+    Editor.init();
+  }
+
+  static get app(){
+    return this._app;
   }
 
   static async LoadProject(type, path){

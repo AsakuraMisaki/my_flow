@@ -25,6 +25,7 @@ const Workspace = () => {
   GEV.on("workspace:list:change", (_)=>{
     updateList(_);
   })
+  
 
   return <Splitter
     style={{
@@ -53,8 +54,15 @@ const Workspace = () => {
         ))
       }
     </Splitter.Panel>
-    <Splitter.Panel style={{minHeight:"100%"}}>
-      <Editor/>
+    <Splitter.Panel style={{height:"100%"}}>
+      <div id="protoEditor" style={{height:"100%", padding:0, margin:0}}></div>
+      {/* <Editor/> */}
+      {/* <Shower/> */}
+    </Splitter.Panel>
+    <Splitter.Panel defaultSize="13%" min="13%" max="50%">
+      <div id="pane"></div>
+      {/* <div id="protoEditor"></div> */}
+      {/* <Editor/> */}
       {/* <Shower/> */}
     </Splitter.Panel>
   </Splitter>

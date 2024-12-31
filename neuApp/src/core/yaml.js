@@ -1,7 +1,7 @@
 import * as YAML from "js-yaml";
 import { ExtensionType, extensions } from "pixi.js";
 
-const loader = {
+export const loader = {
   extension: {
     type: ExtensionType.LoadParser,
     name: 'yaml-loader',
@@ -22,4 +22,3 @@ const loader = {
 
 extensions.add(loader);
 
-export { YAML }
