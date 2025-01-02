@@ -3,12 +3,16 @@ import { Container, Graphics, Point, getGlobalBounds } from "pixi.js";
 import { Utils } from "./Utils";
 import { Enity } from "../core/entity";
 import { AdvanceInput, hitTest } from "../components/advanceInput";
-import { stops } from "./DragToMake";
+import { FrameLike, stops } from "./DragToMake";
+import { Frame, FrameMask } from "./protoObject/frame";
+import { refreshOutline } from "../core/editor";
 
+export const interactives = new Set();
 export async function makeinteractivity(target){
   let e = await Enity.attach(target);
   let input = await e.addComponent("input", new AdvanceInput());
   input.on("pointermove", (pointer)=>{
+    if(stops.has(FrameLike)) return;
     if(Drag.current == target){
       target.x += pointer.x - point.x;
       target.y += pointer.y - point.y;
@@ -16,22 +20,17 @@ export async function makeinteractivity(target){
       point.y = pointer.y;
     }
     if(!hitTest(target)){
-      let g = ranges.get(target);
-      if(g){
-        g.remove();
-      }
-      ranges.delete(target);
-      stops.delete(target);
+      removeFromStack(target);
       return;
     }
-    if(ranges.has(target)) return;
+    if(stackHas(target)) return;
     let b = target.getBounds();
     let g = new Graphics();
+    g.noOutline = true;
     g.rect(b.x, b.y, b.width, b.height);
     g.fill({color:0x223344, alpha:0.5});
     Utils.app.stage.addChild(g);
-    ranges.set(target, g);
-    stops.add(target);
+    addToStack(target, g);
     if(!Drag.current){
       input.clear("pointerdown");
       input.clear("pointerup");
@@ -42,15 +41,50 @@ export async function makeinteractivity(target){
         point.y = pointer.y;
         Drag.current = target;
         input.on("pointerup", ()=>{
+          removeFromStack(Drag.current);
+          removeFromStack(target);
           Drag.current = null;
+          refreshOutline();
+          const parent = ranges.keys().next().value;
+          if(parent && parent instanceof Frame){
+            applyToParent(parent, target);
+            parent.addChild(target);
+          }
         })
       })
     }
+    
   })
 }
 
+function addToStack(target, g){
+  
+  ranges.set(target, g);
+}
+
+function removeFromStack(target){
+  
+  let g = ranges.get(target);
+  if(g){
+    g.remove();
+  }
+  ranges.delete(target);
+}
+
+function stackHas(target){
+  
+  return ranges.has(target);
+}
+
+function applyToParent(parent, target){
+  let pb = parent.getBounds();
+  let tb = target.getBounds();
+  target.x = (tb.x - pb.x);
+  target.y = (tb.y - pb.y);
+}
+
 let point = new Point();
-let ranges = new Map();
+export let ranges = new Map();
 
 export class Drag{
 

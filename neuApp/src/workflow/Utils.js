@@ -2,11 +2,15 @@
 import { EV } from "../core/ev";
 import { events, filesystem, init, os } from '@neutralinojs/lib';
 import * as YAML from 'js-yaml';
-import { Application, Assets, Container, Loader, Sprite, Texture } from 'pixi.js';
+import { Application, Assets, BlurFilter, Container, Filter, Loader, Shader, Sprite, Texture } from 'pixi.js';
 import { Component } from "../core/entity.js";
 import { AdvanceInputSystem, ConfigAdvanceInput } from "../components/advanceInput";
 import { loader } from "../core/yaml";
 import { Editor } from "../core/editor";
+import { Frame } from "./protoObject/frame";
+import { _Text } from "./protoObject/text";
+import { _Sprite } from "./protoObject/sprite";
+import { _Graphics } from "./protoObject/graphics";
 
 
 
@@ -25,16 +29,16 @@ class Utils{
     
     target.appendChild(app.canvas);
     this._app = app;
+    console.log(Filter, Shader, BlurFilter);
     this._nodeMovable = true;
     events.on("ready", ()=>{
       this.getUserData();
     })
-    GEV.emit("ready");
+    
     globalThis.app = app;
 
     const update = function (ticker) {
       app.stage.update(ticker.deltaMS);
-      
     }
     app.ticker.add(update);
     await AdvanceInputSystem._init();
@@ -47,12 +51,38 @@ class Utils{
     ConfigAdvanceInput.create(ConfigAdvanceInput.POINTRE_0)
     .sort()
     .motion("pointerup", ConfigAdvanceInput.STATES_UP);
+    ConfigAdvanceInput.create(ConfigAdvanceInput.POINTRE_1)
 
-    Editor.init();
+    .sort()
+    .motion("move", ConfigAdvanceInput.STATES_DOWN);
+    ConfigAdvanceInput.create(ConfigAdvanceInput.POINTRE_1)
+    .sort()
+    .motion("moving", ConfigAdvanceInput.STATES_POINTER_MOVE);
+    ConfigAdvanceInput.create(ConfigAdvanceInput.POINTRE_1)
+    .sort()
+    .motion("movend", ConfigAdvanceInput.STATES_UP);
+    await Editor.init();
+
+
+    GEV.emit("ready");
   }
 
   static get app(){
     return this._app;
+  }
+  static get tool(){
+    switch (this._tool){
+      case "select":
+        return null
+      case "frame":
+        return Frame
+      case "text":
+        return _Text
+      case "sprite":
+        return _Sprite
+      case "graphics":
+        return _Graphics
+    }
   }
 
   static async LoadProject(type, path){

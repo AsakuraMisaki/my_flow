@@ -1,0 +1,213 @@
+Basic:
+  name:
+    default: instance001
+  width:
+    default: 100
+  height:
+    default: 100
+  x: 
+    default: 0
+  y: 
+    default: 0
+  anchor:
+    default: { x: 0, y: 0 }
+    setting:
+      picker: inline
+      x: { min: 0, max: 1 }
+      y: { min: 0, max: 1 }
+  alpha:
+    default: 1
+    setting: { min: 0, max: 1 }
+  renderable:
+    default: true
+  visible:
+    default: true
+  rotation:
+    default: 0
+    setting: { min: 0, max: 360 }
+  emitUpdate:
+    default: false
+Text:
+  text: 
+    default: name
+TextWrap:
+  enable:
+    default: false
+  width:
+    default: 0
+    setting: {min: 0}
+  passiveRegex: 
+    default: /(\d+(\.\d+)?%?|\D)/g
+  negativeRegex: 
+    default: ""
+TextStyle:
+  align:
+    default: 1
+    setting: 
+      options:
+        left: 0
+        center: 1
+        right: 2
+        justify: 3
+  fontSize:
+    default: 13
+  fontStyle:
+    default: 0
+    setting: 
+      options:
+        normal: 0
+        italic: 1
+        oblique: 2
+  fontWeight:
+    default: 100
+    setting: { min: 100, max: 999 }
+  lineHeight:
+    default: -1
+    setting: { min: -1, max: 999 }
+  textBaseline:
+    default: 0
+    setting:
+      options:
+        alphabetic: 0
+        top: 1
+        hanging: 2
+        middle: 3
+        ideographic: 4
+        bottom: 5
+  fontFamily:
+    default: sans-serif
+  fill: 
+    default: "#000000"
+  stroke:
+    default: "#000000"
+  strokeThickness:
+    default: 0
+    setting: { min: 0, max: 256 }
+Sprite:
+  targetTexture:
+    default: 0
+    setting:
+      options: 
+        tex0: 0
+  frame.xy: 
+    default: { x: 0, y: 0 }
+    setting: 
+      picker: inline
+      x: { min: 0, max: 2048 }
+      y: { min: 0, max: 2048 }
+  frame.wh:
+    default: { x: 0, y: 0 }
+    setting: 
+      picker: inline
+      x: { min: 0, max: 2048 }
+      y: { min: 0, max: 2048 }
+Texture(Base):
+  path:
+    default: ""
+  resolution:
+    default: 1
+    setting: { min: 0, max: 5 }
+  wrapMode(repeatMode):
+    default: CLAMP
+    setting:
+      options:
+        CLAMP: CLAMP
+        REPEAT: REPEAT
+        MIRRORED_REPEAT: MIRRORED_REPEAT
+  scaleMode:
+    default: LINEAR
+    setting:
+      options:
+        NEAREST: NEAREST
+        LINEAR: LINEAR
+Flex:
+  enable:
+    default: false
+  direction:
+    default: vertical
+    setting:
+      options:
+        vertical: vertical
+        horizontal: horizontal
+  spacing:
+    default: 5
+Skew:
+  x:
+    default: 0
+    setting: { min: -4, max: 4 }
+  y:
+    default: 0
+    setting: { min: -4, max: 4 }
+Scale:
+  x:
+    default: 1
+    setting: { min: -16, max: 16 }
+  y:
+    default: 1
+    setting: { min: -16, max: 16 }
+Align:
+  enable:
+    default: false
+  x:
+    default: 0
+    setting: { min: -16, max: 16 }
+  y:
+    default: 0
+    setting: { min: -16, max: 16 }
+Lerp:
+  duration:
+    default: 1000
+    setting: { min: 1 }
+  curve:
+    setting: 
+      picker: 'inline'
+      view: cubicbezier
+      value: [0.5, 0, 0.5, 1]
+      expanded: true    
+Export:
+  name:
+    default: project.types.yaml
+  export:
+    default: button
+    title: start  
+    label: export
+Effect:
+  blend:
+    default: 0
+    setting:
+      options: 
+        normal: 0
+        add: 1
+        screen: 2
+        darken: 3
+        lighten: 4
+        color-dodge: 5
+        color-burn: 6
+        linear-burn: 7
+        linear-dodge: 8
+        linear-light: 9
+        hard-light: 10
+        soft-light: 11
+        pin-light: 12
+        difference: 13
+        exclusion: 14
+        overlay: 15
+        saturation: 16
+        color: 17
+        luminosity: 18
+        add-npm: 19
+        subtract: 20
+        divide: 21
+        vivid-light: 22
+        hard-mix: 23
+        negation: 24
+Filter:
+  name: 
+    default: filtername
+Meta(YAML):
+  config:
+    default: ""
+    setting:
+      readonly: false
+      multiline: true
+      rows: 99
