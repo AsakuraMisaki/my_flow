@@ -6,6 +6,7 @@ import { FrameLike } from "../workflow/DragToMake";
 import { Pane } from "tweakpane";
 import * as EssentialsPlugin from '@tweakpane/plugin-essentials';
 import { app } from "@neutralinojs/lib";
+
 let input = new AdvanceInput();
 let mover = { };
 let Name = 0;
@@ -76,7 +77,11 @@ export class Editor{
 export function refreshOutline(stage, gData=[], parentKey=""){
   stage = stage || Utils.app.stage
   _refreshOutline(stage, gData, parentKey);
+  // exportDatas.outline.clear();
+
   GEV.emit("editor:outline:change", gData);
+  GEV.emit("editor:presetDefault:change", gData);
+  GEV.emit("editor:presets:change", gData);
 }
 
 export const badRefs = new Map();
@@ -85,7 +90,7 @@ function _refreshOutline(stage, gData, parentKey){
     if(c.noOutline) return;
     let next = {
       title: c.name,
-      key: parentKey + "/" + c.name,
+      key: c.name,
       children: []
     }
     badRefs.set(next, c);

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Tree } from 'antd';
 import { GEV } from './Utils';
 const x = 3;
@@ -28,11 +28,13 @@ const generateData = (_level, _preKey, _tns) => {
     return generateData(level, key, tns[index].children);
   });
 };
+// export let exportDatas = { outline: new Set(), presets:new Set() };
 // generateData(z);
-const Outline = () => {
+const Outline = ({type, draggable}) => {
   console.log(defaultData);
   const [gData, setGData] = useState(defaultData);
-  GEV.on("editor:outline:change", (d)=>{
+  
+  GEV.on(`editor:${type}:change`, (d)=>{
     setGData(d);
   })
   const [expandedKeys] = useState([]);
@@ -94,7 +96,7 @@ const Outline = () => {
     <Tree
       className="draggable-tree"
       defaultExpandedKeys={expandedKeys}
-      draggable
+      draggable={draggable}
       blockNode
       onDragEnter={onDragEnter}
       onDrop={onDrop}

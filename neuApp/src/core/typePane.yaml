@@ -3,8 +3,10 @@ Basic:
     default: instance001
   width:
     default: 100
+    setting: {min: 0}
   height:
     default: 100
+    setting: {min: 0}
   x: 
     default: 0
   y: 

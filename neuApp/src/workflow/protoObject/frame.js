@@ -20,7 +20,7 @@ export class Frame extends Container{
     
     this.addChild(this.innerMask, content);
     this.content = content;
-    this.content.mask = this.innerMask;
+    // this.content.mask = this.innerMask;
   }
   getBounds(...args){
     if(this.innerMask){

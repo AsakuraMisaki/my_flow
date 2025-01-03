@@ -6,6 +6,7 @@ import Editor from './Workgraph';
 import Shower from './Block';
 import Outline from './Outline';
 import AssetOutline from './AssetOutline';
+import TextArea from 'antd/es/input/TextArea';
 const {Panel} = Collapse;
 
 function onClick(item){
@@ -29,7 +30,7 @@ const Workspace = () => {
   })
 
   const tabs = [
-    {key: "design", label: "design", children:<Outline/>},
+    {key: "design", label: "design", children:<Outline type={"outline"} draggable={true}/>},
     {key: "asset", label: "asset", children:<AssetOutline/>},
     {key: "prototype", label: "prototype"}
   ]
@@ -62,13 +63,19 @@ const Workspace = () => {
         ))
       }
     </Splitter.Panel> */}
+    
     <Splitter.Panel defaultSize="13%" min="13%" max="50%">
       <Tabs items={tabs} defaultActiveKey='design' size="large"></Tabs>
     </Splitter.Panel>
+    
     <Splitter.Panel style={{height:"100%"}}>
       <div id="protoEditor" style={{height:"100%", padding:0, margin:0}}></div>
       {/* <Editor/> */}
       {/* <Shower/> */}
+    </Splitter.Panel>
+    <Splitter.Panel defaultSize="13%" min="13%" max="50%">
+      <Outline type={"presetDefault"} draggable={true}/>
+      <Outline type={"presets"} draggable={false}/>
     </Splitter.Panel>
     <Splitter.Panel defaultSize="13%" min="13%" max="50%">
       <div id="pane"></div>

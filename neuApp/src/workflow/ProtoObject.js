@@ -14,16 +14,21 @@ export async function makeinteractivity(target){
   input.on("pointermove", (pointer)=>{
     if(stops.has(FrameLike)) return;
     if(Drag.current == target){
+      let g = stackGet(target);
       target.x += pointer.x - point.x;
       target.y += pointer.y - point.y;
       point.x = pointer.x;
       point.y = pointer.y;
+      if(g){
+        g.x = target.x;
+        g.y = target.y;
+      }
     }
     if(!hitTest(target)){
       removeFromStack(target);
       return;
     }
-    if(stackHas(target)) return;
+    if(stackGet(target)) return;
     let b = target.getBounds();
     let g = new Graphics();
     g.noOutline = true;
@@ -71,9 +76,9 @@ function removeFromStack(target){
   ranges.delete(target);
 }
 
-function stackHas(target){
+function stackGet(target){
   
-  return ranges.has(target);
+  return ranges.get(target);
 }
 
 function applyToParent(parent, target){

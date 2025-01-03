@@ -19,7 +19,6 @@ export const BaseComponents = ()=>{
   const [open, setOpen] = useState(false);
   return (
     <>
-      <FloatButton icon={<img src="./workflow/font/component.svg" style={{width:30, height:30, insetInlineEnd: 94}}/>} />
       <FloatButton.Group
         open={open}
         trigger="click"
