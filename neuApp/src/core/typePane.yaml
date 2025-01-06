@@ -206,10 +206,3 @@ Effect:
 Filter:
   name: 
     default: filtername
-Meta(YAML):
-  config:
-    default: ""
-    setting:
-      readonly: false
-      multiline: true
-      rows: 99

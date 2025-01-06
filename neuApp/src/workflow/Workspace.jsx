@@ -7,6 +7,8 @@ import Shower from './Block';
 import Outline from './Outline';
 import AssetOutline from './AssetOutline';
 import TextArea from 'antd/es/input/TextArea';
+import Meta from './Meta';
+import MetaVar from './MetaVar';
 const {Panel} = Collapse;
 
 function onClick(item){
@@ -74,8 +76,9 @@ const Workspace = () => {
       {/* <Shower/> */}
     </Splitter.Panel>
     <Splitter.Panel defaultSize="13%" min="13%" max="50%">
-      <Outline type={"presetDefault"} draggable={true}/>
-      <Outline type={"presets"} draggable={false}/>
+      <Meta/>
+      {/* <Outline type={"presetDefault"} draggable={true}/>
+      <Outline type={"presets"} draggable={false}/> */}
     </Splitter.Panel>
     <Splitter.Panel defaultSize="13%" min="13%" max="50%">
       <div id="pane"></div>

@@ -34,6 +34,7 @@ export class Editor{
   static createPane(container){
     let pane = new Pane({container});
     pane.registerPlugin(EssentialsPlugin);
+    
     return pane;
   }
   static async initPane(){
@@ -43,6 +44,7 @@ export class Editor{
     let keys = Object.keys(this._paneParams);
     let param = this.makeParamsFromBuiltin(...keys);
     this.applyPane(param);
+    console.log(this.pane);
   }
   static makeParamsFromBuiltin(...names){
     let p = {};
@@ -53,6 +55,33 @@ export class Editor{
     })
     return p;
   }
+  static getPaneEleByRefString(str, pane=this.pane){
+    if(!pane) return;
+    const path = str.split(/\./);
+    return this._getPaneEleByRef(pane.children, path);
+  }
+  static _getPaneEleByRef(children, path){
+    let name = path[0];
+    let length = children.length;
+    for(let i=0; i<length; i++){
+      const {element, label, title} = children[i];
+      let c = children[i].children;
+      if(label && label.toLowerCase() == name.toLowerCase()){
+        path.shift();
+        if(!path.length){
+          return element;
+        }
+        return this._getPaneEleByRef(c, path);
+      }
+      else if(title && title.toLowerCase() == name.toLowerCase()){
+        path.shift();
+        if(!path.length){
+          return Array.from(element.children)[0];
+        }
+        return this._getPaneEleByRef(c, path);
+      }
+    }
+  }
   static applyPane(param, pane=this.pane){
     for(const key in param){
       const data = param[key];
@@ -60,16 +89,19 @@ export class Editor{
         title: key
       }) 
       for(const label in data){
-        const p = {};
         const _data = data[label];
-        if(_data.setting && _data.setting.view){
-          f.addBlade(_data.setting);
-        }
-        else{
-          p[label] = _data.default;
-          f.addBinding(p, label, _data.setting || {});
-        } 
+        this._applyPaneParam(_data, label, f);
       }
+    }
+  }
+  static _applyPaneParam(_data, label, target=this.pane){
+    if(_data.setting && _data.setting.view){
+      target.addBlade(_data.setting);
+    }
+    else{
+      const p = {};
+      p[label] = _data.default;
+      target.addBinding(p, label, _data.setting || {});
     }
   }
 }

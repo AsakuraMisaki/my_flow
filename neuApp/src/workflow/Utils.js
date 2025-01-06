@@ -67,6 +67,14 @@ class Utils{
     GEV.emit("ready");
   }
 
+  static transYaml(text){
+    try{
+      return YAML.load(text);
+    }catch(e){
+      console.error(e);
+    }
+  }
+
   static get app(){
     return this._app;
   }
