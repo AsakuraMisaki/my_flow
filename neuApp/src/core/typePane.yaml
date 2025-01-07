@@ -1,6 +1,4 @@
 Basic:
-  name:
-    default: instance001
   width:
     default: 100
     setting: {min: 0}
@@ -11,12 +9,6 @@ Basic:
     default: 0
   y: 
     default: 0
-  anchor:
-    default: { x: 0, y: 0 }
-    setting:
-      picker: inline
-      x: { min: 0, max: 1 }
-      y: { min: 0, max: 1 }
   alpha:
     default: 1
     setting: { min: 0, max: 1 }
@@ -85,27 +77,28 @@ TextStyle:
   strokeThickness:
     default: 0
     setting: { min: 0, max: 256 }
-Sprite:
-  targetTexture:
+Frame:
+  Background:
+    default: "#ffffff"
+Texture:
+  baseTexture:
     default: 0
     setting:
-      options: 
-        tex0: 0
-  frame.xy: 
-    default: { x: 0, y: 0 }
-    setting: 
-      picker: inline
-      x: { min: 0, max: 2048 }
-      y: { min: 0, max: 2048 }
-  frame.wh:
-    default: { x: 0, y: 0 }
-    setting: 
-      picker: inline
-      x: { min: 0, max: 2048 }
-      y: { min: 0, max: 2048 }
-Texture(Base):
-  path:
-    default: ""
+      _dynamic: getTextures
+Tile:
+  x:
+    default: 0
+    setting: { min: 0 }
+  y:
+    default: 0
+    setting: { min: 0 }
+  width:
+    default: 0
+    setting: { min: 0 }
+  height:
+    default: 0
+    setting: { min: 0 }
+BaseTexture:
   resolution:
     default: 1
     setting: { min: 0, max: 5 }
@@ -150,6 +143,13 @@ Scale:
 Align:
   enable:
     default: false
+  x:
+    default: 0
+    setting: { min: 0, max: 1 }
+  y:
+    default: 0
+    setting: { min: 0, max: 1 }
+Anchor:
   x:
     default: 0
     setting: { min: -16, max: 16 }
@@ -203,6 +203,6 @@ Effect:
         vivid-light: 22
         hard-mix: 23
         negation: 24
-Filter:
-  name: 
-    default: filtername
+State:
+  id: 
+    default: default

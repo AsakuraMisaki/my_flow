@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Tree } from 'antd';
 import { GEV } from './Utils';
+import { Editor, badRefs } from '../core/editor';
 const x = 3;
 const y = 2;
 const z = 1;
@@ -98,6 +99,10 @@ const Outline = ({type, draggable}) => {
       defaultExpandedKeys={expandedKeys}
       draggable={draggable}
       blockNode
+      onSelect={(key, e)=>{
+        let r = badRefs.get(key[0]);
+        Editor.select(r);
+      }}
       onDragEnter={onDragEnter}
       onDrop={onDrop}
       treeData={gData}

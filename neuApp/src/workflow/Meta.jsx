@@ -15,50 +15,53 @@ import VarPane from './VarPane';
 const {Panel} = Collapse;
 
 
+
 const Meta = ({type, visual}) => {
   const [value, setValue] = useState("");
   const [items, setItem] = useState([]);
-  const onCode = function(e){
+  const [result, setResult] = useState({});
+  const [pane, setPane] = useState(null);
+  // const clearPanes = ()=>{
+  //   panes.forEach((p)=>{
+  //     p.remove(p.rackApi_);
+  //   })
+  //   panes.clear();
+  // }
+  const onCode = (e)=>{
     let v = e.target.value;
     setValue(v);
-    let result = Utils.transYaml(v);
-    if(!result) return;
-    console.log(result);
-    if(result){
-      const newItem = [];
-      for(let key in result){
-        // const {des, type} = result[key];
-        newItem.push({title:key, target:key, param:result[key]})
-      }
-      console.log(newItem);
-      setItem(newItem);
+    let r = Utils.transYaml(v);
+    if(!r) return;
+    const newItem = [];
+    for(let key in r){
+      newItem.push({title:key, target:key})
     }
+    console.log(newItem);
+    setItem(newItem);
+    setResult(r);
   }
 
-  // useEffect(()=>{
-  //   clearLine();
-  //   let a = Array.from(document.getElementsByClassName("reflect"));
-    
-  //   a.forEach((target)=>{
-  //     let name = target.getAttribute("name").trim();
-  //     // removeLine(name);
-  //     addLine(target, name.replace(/\.$/, ""), );
-      
-  //   })
-   
-  //   // console.log(b, a[0]);
-  //   // if(b && a[0]){
-      
-  //   //   new LeaderLine(
-  //   //     a[0],
-  //   //     b
-  //   //   );
-  //   // }
-  // }, [items])
-  
-  // GEV.on(`meta:${type}:change`, (v)=>{
-  //   setValue(v);
-  // })
+  useEffect(()=>{
+    if(pane){
+      while(pane.children.length){
+        pane.remove(pane.children[0]);
+      }
+      pane.element.remove();
+    }
+    let target = document.getElementById("reflect-vars");
+    console.log(result);
+    let p = Editor.createPane(target);
+    setPane(p);
+    for(let key in result){
+      let param = result[key];
+      try{
+        Editor._applyPaneParam(param, key, p);
+      }catch(e){
+        console.error(e);
+      }
+    }
+  }, [result])
+
 
   return <>
     <Splitter 
@@ -68,16 +71,7 @@ const Meta = ({type, visual}) => {
         boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
       }}>
         <Splitter.Panel>
-          <List dataSource={items} bordered 
-            renderItem={(item) => (
-              <List.Item>
-                <VarPane param={item.param} id={`vars:${item.target}`} name={item.target}/>
-                
-              </List.Item>
-            )}
-          >
-          </List>
-         
+          <div id="reflect-vars"/>
         </Splitter.Panel>
         <Splitter.Panel>
           <TextArea autoSize={{ minRows: 999, maxRows: 999 }} value={value} onChange={onCode}/>

@@ -9,6 +9,7 @@ import AssetOutline from './AssetOutline';
 import TextArea from 'antd/es/input/TextArea';
 import Meta from './Meta';
 import MetaVar from './MetaVar';
+import ProtoList from './ProtoList';
 const {Panel} = Collapse;
 
 function onClick(item){
@@ -34,7 +35,7 @@ const Workspace = () => {
   const tabs = [
     {key: "design", label: "design", children:<Outline type={"outline"} draggable={true}/>},
     {key: "asset", label: "asset", children:<AssetOutline/>},
-    {key: "prototype", label: "prototype"}
+    // {key: "prototype", label: "prototype"}
   ]
   
 
@@ -76,7 +77,7 @@ const Workspace = () => {
       {/* <Shower/> */}
     </Splitter.Panel>
     <Splitter.Panel defaultSize="13%" min="13%" max="50%">
-      <Meta/>
+      <ProtoList/>
       {/* <Outline type={"presetDefault"} draggable={true}/>
       <Outline type={"presets"} draggable={false}/> */}
     </Splitter.Panel>

@@ -25,7 +25,7 @@ class Utils{
 
     let target = document.getElementById("protoEditor");
     // Initialize the application
-    await app.init({ background: '#f5f5f5', resizeTo:target });
+    await app.init({ background: '#bdbdbd', resizeTo:target });
     
     target.appendChild(app.canvas);
     this._app = app;
@@ -63,7 +63,10 @@ class Utils{
     .motion("movend", ConfigAdvanceInput.STATES_UP);
     await Editor.init();
 
-
+    let e = new Editor();
+    await e.setup();
+    app.stage.addChild(e);
+    e.hitArea = app.stage.hitArea = app.screen;
     GEV.emit("ready");
   }
 

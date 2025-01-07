@@ -84,10 +84,7 @@ const Meta = ({type, visual}) => {
     // }
   }, [items])
   
-  // GEV.on(`meta:${type}:change`, (v)=>{
-  //   setValue(v);
-  // })
-
+  
   return <>
     <Splitter 
       layout="vertical"
